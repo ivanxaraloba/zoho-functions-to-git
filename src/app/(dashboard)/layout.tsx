@@ -10,11 +10,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Check if it's a project path
-  if (pathname.includes("/projects/")) {
-    return <>{children}</>;
-  }
-
   const routes = [
     {
       name: "Projects",
@@ -46,6 +41,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return null;
+  }
+
+  if (pathname.includes("/projects/")) {
+    return <>{children}</>;
   }
 
   return (
