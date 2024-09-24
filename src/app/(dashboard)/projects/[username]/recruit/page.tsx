@@ -62,7 +62,7 @@ export default function Page({ params }: { params: { username: string } }) {
       const { error } = await supabase.from("recruit").upsert({
         id: project.recruit?.id,
         projectId: project.id,
-        functions: functionsWithCode.filter((x) => !!x.id),
+        functions: functionsWithCode.filter((x: any) => !!x.id),
         lastSync: formatInTimeZone(
           new Date(),
           "Europe/Lisbon",
