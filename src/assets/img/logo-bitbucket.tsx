@@ -1,8 +1,9 @@
+import { cn } from "@/lib/utils";
 import React from "react";
 
-export default function LogoBitbucket() {
+export default function LogoBitbucket({ className }: any) {
   return (
-    <svg height="20" viewBox="-2 -2 65 59" width="20">
+    <svg className={cn(className)} height="20" viewBox="-2 -2 65 59" width="20">
       <defs>
         <linearGradient
           id="bitbucket-:r2k:"

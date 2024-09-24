@@ -1,15 +1,41 @@
 import { supabase } from "@/lib/supabase/client";
-import { Deparment, Project } from "@/types/types";
+import { Deparment, Project, User } from "@/types/types";
 import { create } from "zustand";
 
 type GlobalState = {
+  user: User | null;
+  getUser: () => Promise<any>;
   projects: Project[];
-  getProjects: () => Promise<void>;
+  getProjects: () => Promise<any>;
   departments: Deparment[];
   getDepartments: () => Promise<void>;
 };
 
 export const useGlobalStore = create<GlobalState>((set) => ({
+  user: null,
+  getUser: async () => {
+    const {
+      data: { user: supabaseUser },
+    } = await supabase.auth.getUser();
+
+    if (!supabaseUser) {
+      return null;
+    }
+
+    const { data: user } = await supabase
+      .from("users")
+      .select()
+      .eq("id", supabaseUser.id)
+      .single();
+
+    if (!user) {
+      set({ user: { ...supabaseUser, profile: null } });
+      return { ...supabaseUser, profile: null };
+    }
+
+    set({ user: { ...supabaseUser, profile: user } });
+    return { ...supabaseUser, profile: user };
+  },
   projects: [],
   getProjects: async () => {
     const { data, error } = await supabase

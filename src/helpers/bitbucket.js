@@ -1,18 +1,12 @@
 "use server";
 
 import axios from "axios";
-import fs from "fs";
-import path from "path";
 
 const workspace = "lobadev";
 const projectKey = "ZFUNCS";
 
-const auth = {
-  username: process.env.BITBUCKET_USERNAME,
-  password: process.env.BITBUCKET_PASSWORD,
-};
-
 export const bitbucketCreateRepository = async (
+  auth,
   repositoryName,
   description = "",
   isPrivate = true
@@ -38,7 +32,7 @@ export const bitbucketCreateRepository = async (
   }
 };
 
-export const bitbucketGetRepository = async (repositoryName) => {
+export const bitbucketGetRepository = async (auth, repositoryName) => {
   try {
     const response = await axios.get(
       `https://api.bitbucket.org/2.0/repositories/${workspace}/${repositoryName}`,
@@ -52,7 +46,12 @@ export const bitbucketGetRepository = async (repositoryName) => {
   }
 };
 
-export const bitbucketCommit = async (repositoryName, formData, message) => {
+export const bitbucketCommit = async (
+  auth,
+  repositoryName,
+  formData,
+  message
+) => {
   try {
     formData.append("message", message);
     const response = await axios.post(

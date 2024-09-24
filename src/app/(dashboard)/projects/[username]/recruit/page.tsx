@@ -35,9 +35,11 @@ import { TypographyH2 } from "@/components/typography/typography-h2";
 import Description from "@/components/ui/description";
 import { time } from "@/utils/generic";
 import { format } from "date-fns";
+import { useGlobalStore } from "@/stores/global";
 
 export default function Page({ params }: { params: { username: string } }) {
   const { username } = params;
+  const { user, getUser } = useGlobalStore();
   const { project, getProject } = useProjectStore();
 
   const mutationRefresh = useMutation({
@@ -85,8 +87,13 @@ export default function Page({ params }: { params: { username: string } }) {
     mutationFn: async () => {
       const name = `loba-projects_${project?.username}`;
 
-      let repository = await bitbucketGetRepository(name);
-      if (!repository) repository = await bitbucketCreateRepository(name);
+      const auth = {
+        username: user?.profile?.bbUsername,
+        password: user?.profile?.bbPassword,
+      };
+
+      let repository = await bitbucketGetRepository(auth, name);
+      if (!repository) repository = await bitbucketCreateRepository(auth, name);
 
       const formData = new FormData();
       project?.recruit?.functions.forEach((func) => {
@@ -97,6 +104,7 @@ export default function Page({ params }: { params: { username: string } }) {
       });
 
       await bitbucketCommit(
+        auth,
         name,
         formData,
         format(new Date(), "dd-MM-yyyy HH:mm:ss")

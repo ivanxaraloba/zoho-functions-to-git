@@ -36,12 +36,14 @@ import {
   bitbucketGetRepository,
 } from "@/helpers/bitbucket";
 import { format } from "date-fns";
+import { useGlobalStore } from "@/stores/global";
 
 export default function Page({ params }: { params: { username: string } }) {
   const router = useRouter();
   const { username } = params;
   const [app, setApp] = useState<creatorApp | null>(null);
   const [code, setCode] = useState<string>("");
+  const { user, getUser } = useGlobalStore();
   const { project, getProject } = useProjectStore();
   const [search, setSearch] = useState("");
 
@@ -148,8 +150,13 @@ export default function Page({ params }: { params: { username: string } }) {
     mutationFn: async () => {
       const name = `loba-projects_${project?.username}`;
 
-      let repository = await bitbucketGetRepository(name);
-      if (!repository) repository = await bitbucketCreateRepository(name);
+      const auth = {
+        username: user?.profile?.bbUsername,
+        password: user?.profile?.bbPassword,
+      };
+
+      let repository = await bitbucketGetRepository(auth, name);
+      if (!repository) repository = await bitbucketCreateRepository(auth, name);
 
       const workflows = app?.accordian.flatMap(
         (form: any) => form.workflows ?? []
@@ -161,6 +168,7 @@ export default function Page({ params }: { params: { username: string } }) {
       });
 
       await bitbucketCommit(
+        auth,
         name,
         formData,
         format(new Date(), "dd-MM-yyyy HH:mm:ss")

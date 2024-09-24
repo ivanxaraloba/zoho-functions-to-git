@@ -50,3 +50,13 @@ export interface Project {
 export interface Function {
   name: string;
 }
+
+export interface User {
+  id: string;
+  profile: {
+    id: string;
+    bbUsername: string;
+    bbPassword: string;
+    created_at: string;
+  } | null;
+}

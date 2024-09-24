@@ -1,15 +1,15 @@
 "use client";
 
 import Sidebar from "@/components/layout/sidebar";
-import { supabase } from "@/lib/supabase/client";
-import { useRouter, usePathname } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 import { PanelsTopLeft } from "lucide-react";
+import FormLoginBitbucket from "@/components/shared/form-login-bitbucket";
+import { useGlobalStore } from "@/stores/global";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-
   const routes = [
     {
       name: "Projects",
@@ -18,43 +18,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, getUser } = useGlobalStore();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-
-      if (!user) {
-        router.push("/login");
-      } else if (!user?.email?.includes("@loba")) {
-        router.push("/error");
-      }
-
-      setIsLoading(false);
-    };
-    fetchUser();
-  }, [router]);
-
-  if (isLoading) {
-    return null;
-  }
+    getUser().then((fetchedUser) => {
+      if (!fetchedUser) router.push("/login");
+    });
+  }, [getUser, router]);
 
   if (pathname.includes("/projects/")) {
     return <>{children}</>;
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
-    user && (
-      <div className="">
+    <>
+      {/* Show login form if the user has no profile */}
+      {!user?.profile && <FormLoginBitbucket />}
+      <div>
         <Sidebar routes={routes} />
         <div className="ml-52">
           <div className="px-10 py-8">{children}</div>
         </div>
       </div>
-    )
+    </>
   );
 }

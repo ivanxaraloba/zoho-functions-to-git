@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, ButtonProps } from "./button";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ButtonLoadingProps extends ButtonProps {
   loading?: boolean;
@@ -15,7 +16,7 @@ const ButtonLoading: React.FC<ButtonLoadingProps> = ({
 }) => {
   return (
     <Button {...props} disabled={loading}>
-      <div className="flex items-center gap-2">
+      <div className={cn("flex items-center gap-2")}>
         {children}
         {loading ? (
           <Loader2 className="size-4 animate-spin" />
