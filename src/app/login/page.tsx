@@ -16,6 +16,9 @@ export default function Page() {
     mutationFn: async () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "bitbucket",
+        options: {
+          redirectTo: process?.env?.NEXT_PUBLIC_SITE_URL,
+        },
       });
       if (error) throw error;
       return data;

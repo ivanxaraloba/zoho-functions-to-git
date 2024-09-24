@@ -35,8 +35,6 @@ export default function Page() {
 
   if (!project) return <p>Loading...</p>;
 
-  console.log(str.slugify(project.name));
-
   return (
     <div className="flex flex-col gap-10">
       <div className="flex items-end">
