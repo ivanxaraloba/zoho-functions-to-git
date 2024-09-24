@@ -1,5 +1,4 @@
 import LogoLoba from "@/assets/img/logo-loba";
-import { signOut } from "@/helpers/authentication";
 import { supabase } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/providers/theme";
