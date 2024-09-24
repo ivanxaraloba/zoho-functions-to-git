@@ -41,11 +41,11 @@ export default function FormLoginBitbucket() {
     },
   });
 
-  const mutationSignIn = useMutation({
+  const mutationCreateUser = useMutation({
     mutationFn: async (data: any) => {
       const { error } = await supabase
         .from("users")
-        .insert({ id: user.id, ...data });
+        .upsert({ id: user?.id, ...data });
       if (error) throw error;
     },
     onSuccess: async () => {
@@ -58,7 +58,7 @@ export default function FormLoginBitbucket() {
   });
 
   const onSubmit = (data: any) => {
-    mutationSignIn.mutate(data);
+    mutationCreateUser.mutate(data);
   };
 
   return (
@@ -100,7 +100,7 @@ export default function FormLoginBitbucket() {
               </div>
               <ButtonLoading
                 icon={ChevronRight}
-                loading={mutationSignIn.isPending}
+                loading={mutationCreateUser.isPending}
                 type="submit"
                 className="mt-10 w-full py-6"
               >
