@@ -33,6 +33,7 @@ import { useProjectStore } from "@/stores/project";
 import ButtonLoading from "../ui/button-loading";
 import { Project } from "@/types/types";
 import VideoPlayerSettings from "./video-player-settings";
+import { BUCKETS } from "@/utils/constants";
 
 const formSchema = z.object({
   owner: z.string().min(1),
@@ -102,7 +103,9 @@ export default function DialogSettingsCreator() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
-            <VideoPlayerSettings src="/videos/settings_creator.mp4" />
+            <VideoPlayerSettings
+              src={`${BUCKETS.SETTINGS}/settings_creator.mp4`}
+            />
           </DialogHeader>
           <Form {...form}>
             <form

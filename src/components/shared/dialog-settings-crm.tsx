@@ -36,6 +36,7 @@ import { Project } from "@/types/types";
 import VideoPlayerSettings from "./video-player-settings";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import Description from "../ui/description";
+import { BUCKETS } from "@/utils/constants";
 
 const formSchema = z.object({
   file: z.instanceof(File),
@@ -105,7 +106,7 @@ export default function DialogSettingsCRM() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
-            <VideoPlayerSettings src="/videos/settings_crm.mp4" />
+            <VideoPlayerSettings src={`${BUCKETS.SETTINGS}/settings_crm.mp4`} />
           </DialogHeader>
           <Form {...form}>
             <form
