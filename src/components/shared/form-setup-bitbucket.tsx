@@ -28,7 +28,7 @@ const formSchema = z.object({
   bbPassword: z.string().min(6, "Bitbucket Password is required"),
 });
 
-export default function FormLoginBitbucket() {
+export default function FormSetupBitbucket() {
   const { user, getUser } = useGlobalStore();
   const router = useRouter();
 

@@ -33,6 +33,9 @@ import { useGlobalStore } from "@/stores/global";
 import { useProjectStore } from "@/stores/project";
 import ButtonLoading from "../ui/button-loading";
 import { Project } from "@/types/types";
+import VideoPlayerSettings from "./video-player-settings";
+import { DialogDescription } from "@radix-ui/react-dialog";
+import Description from "../ui/description";
 
 const formSchema = z.object({
   file: z.instanceof(File),
@@ -102,6 +105,7 @@ export default function DialogSettingsCRM() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
+            <VideoPlayerSettings src="/videos/settings_crm.mov" />
           </DialogHeader>
           <Form {...form}>
             <form

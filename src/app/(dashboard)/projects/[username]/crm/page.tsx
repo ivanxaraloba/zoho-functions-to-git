@@ -9,6 +9,8 @@ import { useMutation } from "@tanstack/react-query";
 import {
   ALargeSmall,
   ArrowUpFromLine,
+  Book,
+  Meh,
   RefreshCcw,
   WholeWord,
 } from "lucide-react";
@@ -35,16 +37,22 @@ import {
   bitbucketGetRepository,
 } from "@/helpers/bitbucket";
 import Description from "@/components/ui/description";
-import { time } from "@/utils/generic";
+import { arr, str, time } from "@/utils/generic";
 import { TypographyH2 } from "@/components/typography/typography-h2";
 import { format } from "date-fns";
 import { useGlobalStore } from "@/stores/global";
+import ScriptViewer from "@/components/shared/code-viewer";
+import { CRMFunctions } from "@/types/applications";
 
 export default function Page({ params }: { params: { username: string } }) {
   const router = useRouter();
   const { username } = params;
   const { user, getUser } = useGlobalStore();
   const { project, getProject } = useProjectStore();
+
+  const [activeFunction, setActiveFunction] = useState<CRMFunctions | null>(
+    null
+  );
 
   const mutationRefresh = useMutation({
     mutationFn: async () => {
@@ -121,6 +129,8 @@ export default function Page({ params }: { params: { username: string } }) {
     ["display_name"]
   );
 
+  const groupBy = arr.groupBy(data, "category") || {};
+
   return (
     <div className="flex flex-col gap-10">
       <div className="flex items-end">
@@ -131,23 +141,14 @@ export default function Page({ params }: { params: { username: string } }) {
       </div>
       {project?.crm && (
         <>
-          {/* <div className="flex gap-2">
-            {["Functions", "Client Script"].map((item: any, index) => (
-              <Button
-                key={index}
-                variant={false ? "default" : "outline"}
-                size="sm"
-              >
-                {item}
-              </Button>
-            ))}
-          </div> */}
           <div className="flex items-end">
             <div className="grid">
               <TypographyH2>Functions</TypographyH2>
-              <Description>
-                Last sync occurred {time.timeAgo(project?.crm?.lastSync)}
-              </Description>
+              {project?.crm?.lastSync && (
+                <Description>
+                  Last sync occurred {time.timeAgo(project?.crm?.lastSync)}
+                </Description>
+              )}
             </div>
             <div className="ml-auto flex items-center gap-3">
               <ButtonLoading
@@ -167,33 +168,65 @@ export default function Page({ params }: { params: { username: string } }) {
               </ButtonLoading>
             </div>
           </div>
-          <div className="flex flex-col gap-4">
-            <SearchInput
-              placeholder="Search for function name or code"
-              filters={filters}
-              setFilters={setFilters}
-            />
-            <Description className="mt-4">
-              Total functions: {project?.crm?.functions?.length || 0}
-            </Description>
-            {data?.map((func: any, index: number) => (
-              <Dialog key={index}>
-                <DialogTrigger>
-                  <Button key={index} variant="outline" className="w-full">
-                    {func?.display_name}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="!max-w-max !w-7/12 max-h-[500px] overflow-auto">
-                  <DialogTitle className="border-b pb-4">
-                    {func?.display_name}
-                  </DialogTitle>
-                  <div className="overflow-auto min-w-96p">
-                    <CodeViewer script={func?.workflow} />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            ))}
-          </div>
+          {project?.crm?.functions?.length ? (
+            <div className="flex flex-col gap-4">
+              <SearchInput
+                placeholder="Search for function name or code"
+                filters={filters}
+                setFilters={setFilters}
+              />
+              <Description className="mt-4">
+                Total functions: {project?.crm?.functions?.length || 0}
+              </Description>
+              <div className="grid grid-cols-3 gap-x-10 rounded-2xl">
+                <div className="flex flex-col text-sm gap-10">
+                  {Object.keys(groupBy).map((category: any, index: any) => {
+                    const functions = groupBy[category];
+                    return (
+                      <div
+                        key={index}
+                        className="bg-primary-foreground p-8 rounded-2xl"
+                      >
+                        {/* Title */}
+                        <div className="flex items-center gap-2">
+                          <Book className="size-4" />
+                          <span className="text-lg">{category}</span>
+                        </div>
+                        {/* Elements */}
+                        {functions?.length > 0 && (
+                          <div className="mt-4 flex flex-col gap-2">
+                            {functions.map((func: any, index: number) => (
+                              <Button
+                                key={index}
+                                size="sm"
+                                variant={
+                                  func.id === activeFunction?.id
+                                    ? "secondary"
+                                    : "ghost"
+                                }
+                                className="text-sm justify-start truncate"
+                                onClick={() => setActiveFunction(func)}
+                              >
+                                {str.decodeHtmlSpecialChars(func.display_name)}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="bg-primary-foreground col-span-2 p-8 rounded-2xl h-[calc(100vh-40px)] sticky top-4 overflow-auto">
+                  <ScriptViewer script={activeFunction?.workflow} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center items-center w-full gap-4">
+              <Meh />
+              <TypographyH1>No functions have been added yet</TypographyH1>
+            </div>
+          )}
         </>
       )}
     </div>

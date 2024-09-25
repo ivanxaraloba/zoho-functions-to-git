@@ -121,6 +121,7 @@ export const str = {
 
 export const time = {
   timeAgo: (timestamptz) => {
+    if (!timestamptz) return;
     const date = new Date(timestamptz);
 
     const localDate = new Date(timestamptz);

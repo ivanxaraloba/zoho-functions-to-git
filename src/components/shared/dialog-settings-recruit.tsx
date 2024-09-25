@@ -33,6 +33,7 @@ import { useGlobalStore } from "@/stores/global";
 import { useProjectStore } from "@/stores/project";
 import ButtonLoading from "../ui/button-loading";
 import { Project } from "@/types/types";
+import VideoPlayerSettings from "./video-player-settings";
 
 const formSchema = z.object({
   file: z.instanceof(File),
@@ -99,6 +100,7 @@ export default function DialogSettingsRecruit() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
+            <VideoPlayerSettings src="/videos/settings_crm.mov" />
           </DialogHeader>
           <Form {...form}>
             <form

@@ -4,7 +4,7 @@ import Sidebar from "@/components/layout/sidebar";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { PanelsTopLeft } from "lucide-react";
-import FormLoginBitbucket from "@/components/shared/form-login-bitbucket";
+import FormSetupBitbucket from "@/components/shared/form-setup-bitbucket";
 import { useGlobalStore } from "@/stores/global";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -36,8 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* Show login form if the user has no profile */}
-      {!user?.profile && <FormLoginBitbucket />}
+      {!user?.profile && <FormSetupBitbucket />}
       <div>
         <Sidebar routes={routes} />
         <div className="ml-52">

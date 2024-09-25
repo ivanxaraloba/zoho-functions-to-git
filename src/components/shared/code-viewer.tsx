@@ -7,12 +7,12 @@ import "@/assets/styles/code-viewer.css";
 import { cn } from "@/lib/utils";
 
 interface ScriptViewerProps {
-  script: string;
+  script?: string;
   language?: "deluge" | "language";
 }
 
 const ScriptViewer: React.FC<ScriptViewerProps> = ({
-  script,
+  script = "",
   language = "deluge",
 }) => {
   useEffect(() => {
