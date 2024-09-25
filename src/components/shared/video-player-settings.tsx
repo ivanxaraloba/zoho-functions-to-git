@@ -20,7 +20,7 @@ export default function VideoPlayerSettings({ src }: { src: string }) {
       <DialogContent className="!w-7/12 !max-w-full !p-0 bg-transparent !border-none !outline-none !ring-0 !ring-offset-0 shadow-2xl">
         <DialogHeader className="">
           <video className="rounded-2xl w-full" controls>
-            <source src={src} />
+            <source src={src} type="video/mp4" />
           </video>
         </DialogHeader>
       </DialogContent>

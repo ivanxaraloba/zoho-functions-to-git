@@ -102,7 +102,7 @@ export default function DialogSettingsCreator() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
-            <VideoPlayerSettings src="/videos/settings_creator.mov" />
+            <VideoPlayerSettings src="/videos/settings_creator.mp4" />
           </DialogHeader>
           <Form {...form}>
             <form

@@ -100,7 +100,7 @@ export default function DialogSettingsRecruit() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
-            <VideoPlayerSettings src="/videos/settings_creator.mov" />
+            <VideoPlayerSettings src="/videos/settings_crm.mp4" />
           </DialogHeader>
           <Form {...form}>
             <form
