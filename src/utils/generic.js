@@ -184,7 +184,7 @@ export const str = {
       });
     }
 
-    // Parse headers
+    // Parse headers and cookies
     lines.slice(1).forEach((line) => {
       const headerMatch = line.match(/-H '([^:]+): (.+)'/);
       if (headerMatch) {
@@ -192,6 +192,10 @@ export const str = {
         const headerValue = headerMatch[2].trim();
         jsonResult[headerKey] = headerValue;
       }
+
+      // Parse cookies (-b flag)
+      const cookieMatch = line.match(/-b '([^']+)'/);
+      if (cookieMatch) jsonResult.cookie = cookieMatch[1];
     });
 
     return jsonResult;
