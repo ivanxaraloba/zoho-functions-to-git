@@ -18,6 +18,7 @@ import { files, obj } from '@/utils/generic';
 
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { Combobox } from '../ui/combobox';
 
 const formSchema = z.object({
   name: z.string().min(3),
@@ -55,6 +56,8 @@ export default function DialogCreateCreatorApp() {
     mutationCreateApp.mutate(data);
   };
 
+
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -76,7 +79,14 @@ export default function DialogCreateCreatorApp() {
                   <FormItem>
                     <FormLabel>App Name *</FormLabel>
                     <FormControl>
-                      <Input placeholder="App Name" {...field} />
+                      <Combobox
+                        variant="outline"
+                        items={project?.creator?.apps.map((i) => ({
+                          label: i.appName,
+                          value: i.appLinkName,
+                        }))}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

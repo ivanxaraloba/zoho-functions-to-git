@@ -23,8 +23,6 @@ export const useProjectStore = create<ProjectState>((set, e) => ({
         .eq('username', username)
         .single();
 
-      console.log(data, error);
-
       if (error) {
         console.log('Error fetching project info:', error);
         return;

@@ -109,7 +109,6 @@ export default function Page({
             {project?.creator ? (
               <>
                 <div className="flex items-center gap-2">
-                  <DialogCreateCreatorApp />
                   {project?.creator?.creatorApps &&
                     project?.creator?.creatorApps.map(
                       (item, index) => (
@@ -138,6 +137,8 @@ export default function Page({
                         </Button>
                       ),
                     )}
+                  <DialogCreateCreatorApp />
+
                 </div>
                 {app?.id && (
                   <div className="mt-10">

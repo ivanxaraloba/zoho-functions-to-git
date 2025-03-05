@@ -58,6 +58,7 @@ export interface Project {
     };
     created_at: any;
     creatorApps?: creatorApp[];
+    apps: any[];
   };
   recruit?: {
     id: number;

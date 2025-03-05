@@ -39,6 +39,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import DialogSettingsSteps from './dialog-settings-steps';
 import VideoPlayerSettings from './video-player-settings';
+import { creatorGetApplications } from '@/helpers/zoho/creator';
 
 const formSchema = z.object({
   owner: z.string().min(1),
@@ -66,17 +67,30 @@ export default function DialogSettingsCreator() {
       owner: string;
       curl?: string;
     }) => {
+      if (!project) throw new Error('Project data is not available.');
+
       const config = str.parseCURL(curl);
 
-      console.log(config);
-
       if (!Object.keys(config)?.length) throw Error('Invalid cURL');
+
+
+      const { data: apps } = await creatorGetApplications(
+        project.domain,
+        project.creator?.config,
+        project.creator?.owner,
+      )
 
       const { error } = await supabase.from('creator').upsert({
         id: project?.creator?.id,
         projectId: project?.id,
         owner,
         config,
+        apps: apps.map((app: AppRaw) => ({
+          appId: app.appId,
+          appName: app.appName,
+          appLinkName: app.appLinkName,
+          creationDate: app.creationDate,
+        })),
       });
       if (error) throw error;
     },

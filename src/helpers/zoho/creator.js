@@ -90,3 +90,23 @@ export const creatorGetFunction = async (
     return { error: err.response?.data || err.message };
   }
 };
+
+export const creatorGetApplications = async (
+  domain,
+  config,
+  owner,
+) => {
+  try {
+    const response = await axios.get(
+      `https://creator.zoho.${domain}/userhome/${owner}/listApps`,
+      {
+        headers: config,
+      },
+    );
+
+    const dashboardApps = response.data?.dashboardApps;
+    return { data: JSON.parse(dashboardApps), error: null };
+  } catch (err) {
+    return { error: err.response?.data || err.message, data: [] };
+  }
+};
