@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useProjectStore } from '@/stores/project';
 import { files, obj } from '@/utils/generic';
 
@@ -57,7 +57,6 @@ export default function DialogCreateCreatorApp() {
   };
 
 
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -88,6 +87,7 @@ export default function DialogCreateCreatorApp() {
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription>If no applications are showing up, set up the Creator config again.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
