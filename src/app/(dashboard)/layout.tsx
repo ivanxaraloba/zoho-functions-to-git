@@ -3,7 +3,7 @@
 import React from 'react';
 
 import { useQuery } from '@tanstack/react-query';
-import { PanelsTopLeft, Parentheses } from 'lucide-react';
+import { Logs, PanelsTopLeft, Parentheses } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import Sidebar from '@/components/layout/sidebar';
@@ -16,6 +16,7 @@ import PageLogin from '../login/page';
 const routes = [
   { name: 'Projects', icon: PanelsTopLeft, to: '/projects' },
   { name: 'Functions', icon: Parentheses, to: '/functions' },
+  { name: 'Logs', icon: Logs, to: '/logs' },
 ];
 
 export default function Layout({
