@@ -117,6 +117,13 @@ const columns: ColumnDefExtended<any>[] = [
     },
   },
   {
+    accessorKey: 'projects.name',
+    title: 'Project Name',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Project" />
+    ),
+  },
+  {
     accessorKey: 'function',
     title: 'Function',
     header: ({ column }) => (
@@ -130,7 +137,7 @@ const columns: ColumnDefExtended<any>[] = [
       <DataTableColumnHeader column={column} title="Notes" />
     ),
     cell: ({ row }) => (
-      <div className="max-h-14 max-w-[500px] overflow-hidden break-words">
+      <div className="max-h-14 max-w-[300px] overflow-hidden break-words">
         {row.getValue('notes')}
       </div>
     ),
@@ -222,11 +229,12 @@ export default function Page({
     queryFn: async () => {
       const { data } = await supabase
         .from('logs')
-        .select('*')
+        .select('*, projects(id, name)')
         .order('created_at', { ascending: false });
       return data;
     },
   });
+
 
   const table = useReactTable({
     data: queryLogs.data || [],
@@ -257,25 +265,29 @@ export default function Page({
           schema: 'public',
           table: 'logs',
         },
-        (payload) => {
-          queryClient.setQueryData(
-            ['logs'],
-            (prev: any[]) => {
-              console.log(payload.new);
+        async (payload) => {
+          const log = payload.new;
 
-              console.log({ prev });
+          const { data: project } = await supabase
+            .from('projects')
+            .select('id, name')
+            .eq('username', log.projectUsername)
+            .single();
 
-              return [payload.new, ...prev];
-            },
-          );
+          const enrichedLog = {
+            ...log,
+            projects: project,
+          };
 
-          setRecentItemIds((prev) => [...prev, payload.new.id]);
+          queryClient.setQueryData(['logs'], (prev: any[]) => {
+            return [enrichedLog, ...(prev || [])];
+          });
+
+          setRecentItemIds((prev) => [...prev, log.id]);
           setTimeout(() => {
-            setRecentItemIds((prev) =>
-              prev.filter((id) => id !== payload.new.id),
-            );
+            setRecentItemIds((prev) => prev.filter((id) => id !== log.id));
           }, 2000);
-        },
+        }
       )
       .subscribe();
 
@@ -382,7 +394,7 @@ export default function Page({
                       className={cn(
                         'transition-all duration-200',
                         recentItemIds.includes(row.original.id) &&
-                          'bg-black/10 dark:bg-white/20',
+                        'bg-black/10 dark:bg-white/20',
                       )}
                     >
                       {row.getVisibleCells().map((cell) => (
