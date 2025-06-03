@@ -34,17 +34,17 @@ const cardGroups = {
   bottom: [
     {
       table: 'crm',
-      title: 'Projects using CRM',
+      title: 'CRM Projects',
       icon: LogoCrm,
     },
     {
       table: 'creator',
-      title: 'Projects using Creator',
+      title: 'Creator Projects',
       icon: LogoCreator,
     },
     {
       table: 'recruit',
-      title: 'Projects using Recruitment',
+      title: 'Recruit Projects',
       icon: LogoRecruit,
     },
   ],
