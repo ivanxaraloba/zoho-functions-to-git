@@ -154,16 +154,6 @@ const columns: ColumnDefExtended<any>[] = [
       </span>
     ),
   },
-  // {
-  //   id: 'actions',
-  //   cell: ({ row }: any) => (
-  //     <div className="flex justify-end space-x-2">
-  //       <Button onClick={() => setViewRow(row)} variant="ghost" size="sm">
-  //         <Eye className="size-4" />
-  //       </Button>
-  //     </div>
-  //   ),
-  // },
   {
     id: 'actions',
     cell: ({ row }: any) => (
@@ -235,7 +225,6 @@ export default function Page({
     },
   });
 
-
   const table = useReactTable({
     data: queryLogs.data || [],
     columns,
@@ -253,7 +242,6 @@ export default function Page({
       columnVisibility,
     },
   });
-
 
   useEffect(() => {
     const changes = supabase
@@ -285,9 +273,11 @@ export default function Page({
 
           setRecentItemIds((prev) => [...prev, log.id]);
           setTimeout(() => {
-            setRecentItemIds((prev) => prev.filter((id) => id !== log.id));
+            setRecentItemIds((prev) =>
+              prev.filter((id) => id !== log.id),
+            );
           }, 2000);
-        }
+        },
       )
       .subscribe();
 
@@ -394,7 +384,7 @@ export default function Page({
                       className={cn(
                         'transition-all duration-200',
                         recentItemIds.includes(row.original.id) &&
-                        'bg-black/10 dark:bg-white/20',
+                          'bg-black/10 dark:bg-white/20',
                       )}
                     >
                       {row.getVisibleCells().map((cell) => (

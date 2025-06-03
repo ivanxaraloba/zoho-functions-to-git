@@ -108,6 +108,8 @@ export const crmTestFunction = async (
   timesToRun,
   code,
 ) => {
+  console.log('Testing function with code:');
+
   try {
     const match = code.match(/(?:function\s+|(?:\w+\.)?)(\w+)\s*\(/);
     if (!match)
@@ -122,31 +124,52 @@ export const crmTestFunction = async (
       (_, index) => index + 1,
     );
 
-    const result = {};
-    for (const index of execNumbers) {
-      const response = await axios.post(
-        url,
-        {
-          functions: [
-            {
-              script: code,
-              arguments: {},
-            },
-          ],
-        },
-        { headers: config },
-      );
-      console.log(index);
+    const promises = execNumbers.map((index) => {
+      const codeFinal = code.replace(/\[index\]/g, index);
 
-      result[`execution_${index}`] = response.data?.functions[0];
-    }
+      return axios
+        .post(
+          url,
+          {
+            functions: [
+              {
+                script: codeFinal,
+                arguments: {},
+              },
+            ],
+          },
+          { headers: config },
+        )
+        .then((response) => ({
+          execution: index,
+          response: response.data,
+          codeFinal,
+          index,
+        }))
+        .catch((err) => ({
+          execution: index,
+          error: err?.response?.data || 'Internal error',
+          index,
+        }));
+    });
+
+    const results = await Promise.all(promises);
+
+    const result = results.reduce(
+      (acc, { execution, response, error, codeFinal, index }) => {
+        acc[execution] = { response, error, codeFinal, index };
+        return acc;
+      },
+      {},
+    );
 
     return {
       data: result,
       error: null,
     };
   } catch (err) {
-    console.log(err?.response?.data || 'Internal error');
+    // console.log(err?.response?.data || 'Internal error');
+    console.log('Internal error');
     return {
       data: null,
       error: err?.response?.data || 'Internal error',

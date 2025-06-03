@@ -47,6 +47,13 @@ export const LOGS_TYPES_COLORS = {
 };
 
 export const CONFIG_FUNCTION_VARIABLE = {
-  EXAMPLE: '[var:VARIABLE1]',
-  REGEX: /\[var:([A-Z0-9_]+)\]/g,
+  EXAMPLE: '[index]',
+  REGEX: /\[index\]/g,
 };
+
+// export const CONFIG_FUNCTION_VARIABLE = {
+//   EXAMPLE: '[var:VARIABLE1]',
+//   REGEX: /\[var:([A-Z0-9_]+)\]/g,
+// };
+
+

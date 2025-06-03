@@ -142,11 +142,10 @@ export default function TabFunctions({
 
       return functionsWithCode;
     },
-    onSuccess: (data) => {
-      getProject(username);
-      if (activeFn) {
+    onSuccess: async (data) => {
+      await getProject(username);
+      if (activeFn)
         setActiveFn(data.find((func) => func.id === activeFn.id));
-      }
       toast.success('Functions updated successfully.');
     },
     onError: (err) => {

@@ -54,9 +54,10 @@ export default function DialogSettingsCRM2() {
 
   const mutationCreateProject = useMutation({
     mutationFn: async ({ curl }: { curl: string }) => {
-
       // parse
       const config = str.parseCURL(curl);
+
+      console.log({ config });
 
       // test api
       const { error: errorTesting, data } = await crmGetFunctions(
@@ -64,6 +65,8 @@ export default function DialogSettingsCRM2() {
         config,
         { limit: 1 },
       );
+
+      console.log(errorTesting, data);
 
       if (errorTesting) throw errorTesting;
 

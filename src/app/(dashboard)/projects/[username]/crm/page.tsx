@@ -47,14 +47,14 @@ import { useProjectStore } from '@/stores/project';
 import { arr, str, time } from '@/utils/generic';
 import LogoCrm from '@/assets/img/logo-crm';
 
-import TabClientScripts from './tab_bulkexecution';
 import TabConnections from './tab_connections';
+import TabClientScripts from './tab_function-execution';
 import TabFunctions from './tab_functions';
 
 const TABS = [
   { id: 'functions', label: 'Functions' },
   { id: 'client_scripts', label: 'Client Scripts' },
-  { id: 'bulk_execution', label: 'Bulk Execution' },
+  { id: 'function_execution', label: 'Function Execution' },
   // { id: 'connections', label: 'Connections' },
 ];
 
@@ -96,7 +96,7 @@ export default function Page({
                     className="mt-10"
                   />
                 )}
-                {activeTab === 'bulk_execution' && (
+                {activeTab === 'function_execution' && (
                   <TabClientScripts />
                 )}
                 {activeTab === 'connections' && <TabConnections />}

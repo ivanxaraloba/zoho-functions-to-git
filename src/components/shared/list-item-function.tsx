@@ -81,6 +81,8 @@ export default function ListItemFunction({
             className="text-amber-500"
           />
         ) : (
+
+          
           !!commits?.length && (
             <TooltipIcon
               icon={ArrowUpFromLine}

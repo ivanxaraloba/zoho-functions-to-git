@@ -18,7 +18,10 @@ export const matchByWords = (
     }
 
     if (wholeWord) {
-      const regex = new RegExp(`\\b${searchValue}\\b`, caseSensitive ? '' : 'i');
+      const regex = new RegExp(
+        `\\b${searchValue}\\b`,
+        caseSensitive ? '' : 'i',
+      );
       return regex.test(toSearch);
     }
     return toSearch.includes(searchValue);
