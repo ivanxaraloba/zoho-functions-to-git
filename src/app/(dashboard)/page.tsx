@@ -95,7 +95,7 @@ export default function Page() {
   return (
     <div>
       <div className="flex items-center gap-4 pb-10 text-xs">
-        <TypographyH1>Projects</TypographyH1>
+        <TypographyH1>Dashboard</TypographyH1>
       </div>
 
       <div className="space-y-4">
