@@ -40,7 +40,7 @@ export default function Sidebar({
       >
         <div className="flex h-full w-full flex-col">
           {/* Logo section */}
-          <Link href="/projects">
+          <Link href="/">
             <Button
               variant="ghost"
               className="h-12 w-full items-center justify-start"
