@@ -146,7 +146,7 @@ export function ChartBarMultiple() {
             <ChartLegend content={<ChartLegendContent />} />
           </BarChart>
         </ChartContainer>
-        <CardFooter className="mt-4 flex flex-col justify-center pb-0 text-xs text-muted-foreground">
+        <CardFooter className="text-muted-foreground mt-4 flex flex-col justify-center pb-0 text-xs">
           <div>
             {projects.length} project{projects.length !== 1 && 's'}{' '}
             with error logs in the last {DAYS} days.
