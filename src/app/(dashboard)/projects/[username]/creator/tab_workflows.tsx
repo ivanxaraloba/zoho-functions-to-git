@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import {
   creatorGetAppStructure,
   creatorGetFunction,
-} from '@/helpers/zoho/creator';
+} from '@/lib/zoho/creator';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { Commit, creatorApp } from '@/types/types';

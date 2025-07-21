@@ -12,7 +12,7 @@ export default function VideoPlayerSettings({ src }: { src: string }) {
           Need help? <span className="underline underline-offset-2">click here</span>
         </Description>
       </DialogTrigger>
-      <DialogContent className="!w-7/12 !max-w-full !border-none bg-transparent !p-0 shadow-2xl !outline-none !ring-0 !ring-offset-0">
+      <DialogContent className="w-7/12! max-w-full! border-none! bg-transparent p-0! shadow-2xl outline-hidden! ring-0! ring-offset-0!">
         <DialogHeader className="">
           <video className="w-full rounded-2xl" controls>
             <source src={src} type="video/mp4" />

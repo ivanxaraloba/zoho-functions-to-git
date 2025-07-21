@@ -20,7 +20,23 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 
-interface DataTableFacetedFilterProps<TData, TValue> {
+export type StringKeyOf<TData> = Extract<keyof TData, string>;
+
+export interface Option {
+  label: string;
+  value: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  count?: number;
+}
+
+export interface DataTableFilterField<TData> {
+  id: StringKeyOf<TData>;
+  label: string;
+  placeholder?: string;
+  options?: Option[];
+}
+
+export interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
   title?: string;
   options: {
@@ -43,7 +59,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="border-dashed">
+        <Button size="sm" variant="outline" className="border-dashed">
           <PlusCircledIcon className="size-4" />
           {title}
           {selectedValues?.size > 0 && (
@@ -86,12 +102,12 @@ export function DataTableFacetedFilter<TData, TValue>({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[12.5rem] p-0" align="start">
+      <PopoverContent className="w-50 p-0" align="start">
         <Command>
           <CommandInput placeholder={title} />
           <CommandList className="max-h-full">
             <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup className="max-h-[18.75rem] overflow-y-auto overflow-x-hidden">
+            <CommandGroup className="max-h-75 overflow-y-auto overflow-x-hidden">
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value);
 

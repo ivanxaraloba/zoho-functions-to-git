@@ -5,19 +5,33 @@ import { SlidersHorizontal, X } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
-export default function PopoverFilters({ children, count }: { children: any; count?: number }) {
+export default function PopoverFilters({
+  children,
+  count,
+}: {
+  children: any;
+  count?: number;
+}) {
   return (
     <Popover>
       <PopoverTrigger>
-        <Button variant="outline" size="icon" className="relative">
+        <Button
+          variant="outline"
+          size="icon"
+          className="relative h-8 w-8"
+        >
           {!!count && count > 0 && (
             <Badge className="absolute -bottom-1 -left-1 flex size-4 items-center justify-center rounded-full p-0 text-[8px]">
               {count}
             </Badge>
           )}
-          <SlidersHorizontal className="size-4" />
+          <SlidersHorizontal />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0" align="end">

@@ -42,7 +42,7 @@ type WithIconProps = {
 
 export function AppTabDescription({ icon: Icon, children }: WithIconProps) {
   return (
-    <Description className="flex max-w-2xl items-center gap-2">
+    <Description className="flex max-w-2xl items-center gap-2 ">
       {Icon && <Icon className="size-3" />}
       {children}
     </Description>

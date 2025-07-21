@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/providers/theme';
+import { useTheme } from "next-themes"
 import { Command, LogOut, Search, SunMoon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -20,31 +20,17 @@ interface Route {
   className?: string;
 }
 
-export default function Sidebar({
-  routes,
-  onlyIcons = false,
-}: {
-  routes: Route[];
-  onlyIcons?: boolean;
-}) {
+export default function Sidebar({ routes, onlyIcons = false }: { routes: Route[]; onlyIcons?: boolean }) {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
 
   return (
     <div className="fixed h-screen border-r">
-      <div
-        className={cn(
-          'h-full px-2 py-8',
-          onlyIcons ? 'w-[68px]' : 'w-52',
-        )}
-      >
+      <div className={cn('h-full px-2 py-8', onlyIcons ? 'w-[68px]' : 'w-52')}>
         <div className="flex h-full w-full flex-col">
           {/* Logo section */}
           <Link href="/">
-            <Button
-              variant="ghost"
-              className="h-12 w-full items-center justify-start"
-            >
+            <Button variant="ghost" className="h-12 w-full items-center justify-start">
               <LogoLoba />
             </Button>
           </Link>
@@ -53,23 +39,13 @@ export default function Sidebar({
           <div className="mt-5 flex flex-col gap-1">
             {routes.map((item: any, index: number) => (
               <React.Fragment key={item.to}>
-                <Link prefetch href={item.to}>
+                <Link href={item.to}>
                   <Button
-                    variant={
-                      pathname === item.to ? 'secondary' : 'ghost'
-                    }
-                    className={cn(
-                      'h-12 w-full items-center justify-start',
-                      item.className,
-                    )}
+                    variant={pathname === item.to ? 'secondary' : 'ghost'}
+                    className={cn('h-12 w-full items-center justify-start', item.className)}
                   >
-                    <item.icon
-                      className={cn('size-5', item.classNameIcon)}
-                      strokeWidth={1.5}
-                    />
-                    {!onlyIcons && (
-                      <span className="font-medium">{item.name}</span>
-                    )}
+                    <item.icon className={cn('size-5', item.classNameIcon)} strokeWidth={1.5} />
+                    {!onlyIcons && <span className="font-medium">{item.name}</span>}
                   </Button>
                 </Link>
                 {/* Add border except after the last item */}
@@ -80,10 +56,7 @@ export default function Sidebar({
 
           <div className="mt-auto flex flex-col">
             <DialogSearch>
-              <Button
-                variant="ghost"
-                className="h-12 w-full items-center justify-start"
-              >
+              <Button variant="ghost" className="h-12 w-full items-center justify-start">
                 <Search className="size-5" strokeWidth={1.5} />
                 {!onlyIcons && (
                   <>
@@ -99,26 +72,14 @@ export default function Sidebar({
                 )}
               </Button>
             </DialogSearch>
-            <Button
-              onClick={toggleTheme}
-              variant="ghost"
-              className="h-12 w-full items-center justify-start"
-            >
+            <Button onClick={toggleTheme} variant="ghost" className="h-12 w-full items-center justify-start">
               <SunMoon className="size-5" strokeWidth={1.5} />
-              {!onlyIcons && (
-                <span className="font-medium">Theme</span>
-              )}
+              {!onlyIcons && <span className="font-medium">Theme</span>}
             </Button>
 
-            <Button
-              onClick={() => signOut()}
-              variant="ghost"
-              className="h-12 w-full items-center justify-start"
-            >
+            <Button onClick={() => signOut()} variant="ghost" className="h-12 w-full items-center justify-start">
               <LogOut className="size-5" strokeWidth={1.5} />
-              {!onlyIcons && (
-                <span className="font-medium">Logout</span>
-              )}
+              {!onlyIcons && <span className="font-medium">Logout</span>}
             </Button>
           </div>
         </div>

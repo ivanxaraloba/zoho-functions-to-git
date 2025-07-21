@@ -15,12 +15,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { str } from '@/utils/generic';
 
 import { Button } from '../ui/button';
@@ -66,13 +61,7 @@ export default function ListItemFunction({
     >
       <span>{str.decodeHtmlSpecialChars(functionName)}</span>
       <div className="ml-auto flex items-center gap-2">
-        {!functionCode && (
-          <TooltipIcon
-            icon={TriangleAlert}
-            text="Function is empty"
-            className="text-red-400"
-          />
-        )}
+        {!functionCode && <TooltipIcon icon={TriangleAlert} text="Function is empty" className="text-red-400" />}
 
         {!!commitsPending?.length ? (
           <TooltipIcon
@@ -81,24 +70,12 @@ export default function ListItemFunction({
             className="text-amber-500"
           />
         ) : (
-
-          
           !!commits?.length && (
-            <TooltipIcon
-              icon={ArrowUpFromLine}
-              text={`${commits.length} pushed commits`}
-              className="text-green-500"
-            />
+            <TooltipIcon icon={ArrowUpFromLine} text={`${commits.length} pushed commits`} className="text-green-500" />
           )
         )}
 
-        {!!toCommit && (
-          <TooltipIcon
-            icon={CircleFadingArrowUp}
-            text="To be committed"
-            className="text-yellow-400"
-          />
-        )}
+        {!!toCommit && <TooltipIcon icon={CircleFadingArrowUp} text="To be committed" className="text-yellow-400" />}
       </div>
     </Button>
   );

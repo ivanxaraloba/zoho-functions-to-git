@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { crmTestFunction } from '@/helpers/zoho/crm';
+import { crmTestFunction } from '@/lib/zoho/crm';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';

@@ -1,10 +1,11 @@
 import React from 'react';
 
 export default function LogoLoba() {
+  const size = 16;
   return (
     <svg
-      width="20"
-      height="20"
+      width={size}
+      height={size}
       viewBox="0 0 37 41"
       xmlns="http://www.w3.org/2000/svg"
       className="fill-current stroke-current text-black dark:stroke-gray-400 dark:text-white"

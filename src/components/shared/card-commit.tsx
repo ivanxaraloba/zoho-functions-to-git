@@ -3,39 +3,32 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Commit, Project } from '@/types/types';
 import { format } from 'date-fns';
-import { Eye } from 'lucide-react';
+import { CheckCircle, CircleCheck, CircleFadingArrowUp, Eye } from 'lucide-react';
 import Link from 'next/link';
+
+import { time } from '@/utils/generic';
 
 import { Button } from '../ui/button';
 import Description from '../ui/description';
 
-export default function CardCommit({ commit }: { commit: Commit }) {
+export default function CardCommit({ commit, onClick }: { commit: Commit; onClick: any }) {
   return (
-    <div key={commit.id} className="flex items-center p-4 py-3">
-      <div
-        className={cn(
-          'mr-4 size-2 rounded-full',
-          commit.status === 'committed' ? 'bg-green-400' : 'bg-amber-400',
+    <Button onClick={onClick} variant="ghost" className="h-full justify-start p-2">
+      <div className="mr-2">
+        {commit.status === 'pending' ? (
+          <CircleFadingArrowUp className="!size-3.5 text-amber-500" />
+        ) : commit.status === 'committed' ? (
+          <CircleCheck className="!size-3.5 text-green-400" />
+        ) : (
+          <span>?</span>
         )}
-      />
-      <div className="flex flex-col">
-        <span className="text-sm font-semibold">{commit.message}</span>
-        <Description className="flex items-center gap-2 text-xs">
-          <span>
-            {commit.users.bbUsername} • {format(commit.created_at, 'dd-MM-yyyy HH:mm:ss')}
-          </span>
-        </Description>
       </div>
-      <div className="ml-auto">
-        <Link
-          target="_blank"
-          href={`/projects/${commit.projects?.username}/${commit.path.split('/')[0]}?commit=${commit.id}`}
-        >
-          <Button size="icon" variant="ghost">
-            <Eye className="size-4" />
-          </Button>
-        </Link>
+      <div className="flex flex-col items-start">
+        <span className="text-sm font-medium">{commit.message}</span>
+        <span className="text-xs font-normal">
+          {commit.users.bbUsername}, {time.friendlyTime(commit.created_at)}
+        </span>
       </div>
-    </div>
+    </Button>
   );
 }

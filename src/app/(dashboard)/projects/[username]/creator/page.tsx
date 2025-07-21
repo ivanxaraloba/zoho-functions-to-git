@@ -2,26 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 
-import {
-  creatorGetAppStructure,
-  creatorGetFunction,
-} from '@/helpers/zoho/creator';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
+import { creatorGetAppStructure, creatorGetFunction } from '@/lib/zoho/creator';
 import { creatorApp, Project } from '@/types/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
-import {
-  Angry,
-  ArrowUpFromLine,
-  Book,
-  FolderCode,
-  RefreshCcw,
-  Trash,
-  TriangleAlert,
-  X,
-} from 'lucide-react';
+import { Angry, ArrowUpFromLine, Book, FolderCode, RefreshCcw, Trash, TriangleAlert, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -59,11 +47,7 @@ const TABS = [
   { id: 'functions', label: 'Functions' },
 ];
 
-export default function Page({
-  params,
-}: {
-  params: { username: string };
-}) {
+export default function Page({ params }: { params: { username: string } }) {
   const { username } = params;
   const { user, getUser } = useGlobalStore();
   const { project, getProject } = useProjectStore();
@@ -74,10 +58,7 @@ export default function Page({
     mutationFn: async (appId: any) => {
       if (!project) throw new Error('Project data is not available');
 
-      const { error } = await supabase
-        .from('creatorApps')
-        .delete()
-        .eq('id', appId);
+      const { error } = await supabase.from('creatorApps').delete().eq('id', appId);
       if (error) throw error;
     },
     onSuccess: async () => {
@@ -91,8 +72,7 @@ export default function Page({
   });
 
   useEffect(() => {
-    if (project?.creator?.creatorApps?.length)
-      setApp(project.creator.creatorApps[0]);
+    if (project?.creator?.creatorApps?.length) setApp(project.creator.creatorApps[0]);
   }, [project?.id]);
 
   return (
@@ -110,66 +90,39 @@ export default function Page({
               <>
                 <div className="flex items-center gap-2">
                   {project?.creator?.creatorApps &&
-                    project?.creator?.creatorApps.map(
-                      (item, index) => (
-                        <Button
-                          key={index}
-                          variant={
-                            app?.id === item.id
-                              ? 'default'
-                              : 'outline'
+                    project?.creator?.creatorApps.map((item, index) => (
+                      <Button
+                        key={index}
+                        variant={app?.id === item.id ? 'default' : 'outline'}
+                        onClick={() => setApp(item)}
+                        size="sm"
+                        className="group relative gap-0 rounded-full px-6"
+                      >
+                        <span>{item.name}</span>
+                        <DialogConfirmation
+                          action={() => mutationDeleteApp.mutate(app?.id)}
+                          button={
+                            <div className="bg-destructive absolute -top-1.5 -right-1.5 hidden size-5 items-center justify-center rounded-full transition-all group-hover:flex">
+                              <X className="size-3 text-white" />
+                            </div>
                           }
-                          onClick={() => setApp(item)}
-                          size="sm"
-                          className="group relative gap-0 rounded-full px-6"
-                        >
-                          <span>{item.name}</span>
-                          <DialogConfirmation
-                            action={() =>
-                              mutationDeleteApp.mutate(app?.id)
-                            }
-                            button={
-                              <div className="absolute -right-1.5 -top-1.5 hidden size-5 items-center justify-center rounded-full bg-destructive transition-all group-hover:flex">
-                                <X className="size-3 text-white" />
-                              </div>
-                            }
-                          />
-                        </Button>
-                      ),
-                    )}
+                        />
+                      </Button>
+                    ))}
                   <DialogCreateCreatorApp />
-
                 </div>
                 {app?.id && (
                   <div className="mt-10">
-                    <ButtonNavTabs
-                      tabs={TABS}
-                      activeTabId={activeTab}
-                      toggle={setActiveTab}
-                      springy
-                    />
-                    {activeTab === 'workflows' && (
-                      <TabWorkflows
-                        username={username}
-                        app={app}
-                        setApp={setApp}
-                      />
-                    )}
+                    <ButtonNavTabs tabs={TABS} activeTabId={activeTab} toggle={setActiveTab} springy />
+                    {activeTab === 'workflows' && <TabWorkflows username={username} app={app} setApp={setApp} />}
                     {activeTab === 'functions' && (
-                      <SectionMissing
-                        icon={Angry}
-                        message="Espera um pouco ainda estou a fazer"
-                        className="mt-10"
-                      />
+                      <SectionMissing icon={Angry} message="Espera um pouco ainda estou a fazer" className="mt-10" />
                     )}
                   </div>
                 )}
               </>
             ) : (
-              <SectionMissing
-                icon={TriangleAlert}
-                message="Set up settings to continue"
-              />
+              <SectionMissing icon={TriangleAlert} message="Set up settings to continue" />
             )}
           </>
         )}

@@ -6,8 +6,12 @@ import { Toaster } from 'sonner';
 import './globals.css';
 
 import { cn } from '@/lib/utils';
-import ReactQueryProvider from '@/providers/react-query';
-import { ThemeProvider } from '@/providers/theme';
+import ReactQueryProvider from '@/providers/react-query-provider';
+import { ThemeProvider } from '@/providers/theme-provider';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
+
+import { AppSidebar } from '@/components/layout/navbar/app-sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,15 +27,20 @@ export default function RootLayout({
 }>) {
   return (
     <ReactQueryProvider>
-      <ThemeProvider>
-        <html lang="en" className="dark">
-          <body className={cn(inter.className, 'pb-if-overflow')}>
-            <Analytics />
-            <Toaster richColors />
-            <main>{children}</main>
-          </body>
-        </html>
-      </ThemeProvider>
+      <html lang="en" className="dark" suppressHydrationWarning>
+        <body className={cn(inter.className, false && 'pb-if-overflow')}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <NuqsAdapter>
+              <Analytics />
+              <Toaster richColors />
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset className="m-0!">{children}</SidebarInset>
+              </SidebarProvider>
+            </NuqsAdapter>
+          </ThemeProvider>
+        </body>
+      </html>
     </ReactQueryProvider>
   );
 }

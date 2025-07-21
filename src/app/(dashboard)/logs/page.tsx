@@ -1,249 +1,89 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { supabase } from '@/lib/supabase/client';
-import { cn } from '@/lib/utils';
-import { queryClient } from '@/providers/react-query';
-import { useTheme } from '@/providers/theme';
-import { MixerHorizontalIcon } from '@radix-ui/react-icons';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { queryClient } from '@/providers/react-query-provider';
+import { DataTableAdvancedFilterField } from '@/types';
+import { useQuery } from '@tanstack/react-query';
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  SortingState,
-  useReactTable,
-  VisibilityState,
-} from '@tanstack/react-table';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { JsonViewer } from '@textea/json-viewer';
-import { format } from 'date-fns';
-import { ArrowUpDown, Check, Eye, Logs } from 'lucide-react';
-import Link from 'next/link';
+  AlertTriangle,
+  Ban,
+  Check,
+  ChevronDown,
+  ClipboardIcon,
+  Eye,
+  Info,
+  PauseCircle,
+  PlayCircle,
+} from 'lucide-react';
+import { createSearchParamsCache, parseAsArrayOf, parseAsInteger, parseAsString, parseAsStringEnum } from 'nuqs/server';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
-import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { DataTableFacetedFilter } from '@/components/data-table/data-table-faceted-filter';
-import LoadingScreen from '@/components/shared/loading-screen';
-import { TypographyH1 } from '@/components/typography/typography-h1';
-import { Badge } from '@/components/ui/badge';
+import { DataTable } from '@/components/data-table/data-table';
+import { RowAction, TableData } from '@/components/data-table/data-table-config';
+import { DataTableFilterField } from '@/components/data-table/data-table-faceted-filter';
+import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
+import MainContainer from '@/components/layout/main-container';
+import DialogViewLogNotes from '@/components/shared/dialog-view-log-notes';
 import { Button } from '@/components/ui/button';
-import ButtonLoading from '@/components/ui/button-loading';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { useProjectStore } from '@/stores/project';
-import { LOGS_TYPES, LOGS_TYPES_COLORS } from '@/utils/constants';
-import { time, type } from '@/utils/generic';
+import { useGlobalStore } from '@/stores/global';
+import { useDataTable } from '@/hooks/use-data-table';
+import { LOGS_TYPES } from '@/utils/constants';
+import { logExamples } from '@/utils/log-examples';
+import { getFiltersStateParser, getSortingStateParser } from '@/utils/parsers';
+import { applyFiltersParamsToQuery } from '@/utils/query';
 
-type ColumnDefExtended<TData = any> = ColumnDef<TData> & {
-  title?: string;
-};
+import { advancedFilterField, columns, columnsSearchParams, filterFields } from './columns';
 
-const columns: ColumnDefExtended<any>[] = [
-  {
-    id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={(value) =>
-          table.toggleAllPageRowsSelected(!!value)
-        }
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'type',
-    title: 'Type',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Type" />
-    ),
-    cell: ({ row }) => (
-      <Badge
-        className="pointer-events-none rounded-full text-white shadow-none"
-        style={{
-          // @ts-ignore
-          backgroundColor: `rgb(${LOGS_TYPES_COLORS[row.original.type]})`,
-        }}
-      >
-        {row.original.type}
-      </Badge>
-    ),
-    filterFn: (row, columnId, filterValues) => {
-      // Apply 'or' filtering logic
-      return filterValues.some(
-        (val: any) => row.getValue(columnId) === val,
-      );
-    },
-  },
-  {
-    accessorKey: 'projects.name',
-    title: 'Project Name',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Project" />
-    ),
-  },
-  {
-    accessorKey: 'function',
-    title: 'Function',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Function" />
-    ),
-  },
-  {
-    accessorKey: 'notes',
-    title: 'Notes',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Notes" />
-    ),
-    cell: ({ row }) => (
-      <div className="max-h-14 max-w-[300px] overflow-hidden break-words">
-        {row.getValue('notes')}
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'created_at',
-    title: 'Created At',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created At" />
-    ),
-    cell: ({ row }) => (
-      <span className="whitespace-nowrap">
-        {format(row.getValue('created_at'), 'dd-MM-yyyy HH:mm:ss')}
-      </span>
-    ),
-  },
-  {
-    id: 'actions',
-    cell: ({ row }: any) => (
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="ghost" size="sm">
-            <Eye className="size-4" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="min-w-96 sm:max-w-2xl">
-          <DialogHeader className="border-b pb-2">
-            <DialogTitle>
-              <div
-                className="mr-2 inline-flex size-2 rounded-full"
-                style={{
-                  backgroundColor: `rgb(${LOGS_TYPES_COLORS[row.original.type]})`,
-                }}
-              />
-              <span>{row.original.function}</span>
-            </DialogTitle>
-            <DialogDescription>
-              {time.timeAgo(row.original.created_at)} -{' '}
-              {format(row.original.created_at, 'dd-MM-yyyy HH:mm:ss')}
-            </DialogDescription>
-          </DialogHeader>
-          <span className="h-96 max-h-96 overflow-auto whitespace-pre-wrap">
-            {type.isJson(row.original.notes) ? (
-              <JsonViewer
-                value={JSON.parse(row.original.notes)}
-                theme="dark"
-                displayDataTypes={false}
-                rootName={false}
-                collapseStringsAfterLength={20}
-              />
-            ) : (
-              row.original.notes
-            )}
-          </span>
-        </DialogContent>
-      </Dialog>
-    ),
-  },
-];
+export default function Page() {
+  const { projects } = useGlobalStore();
 
-export default function Page({
-  params,
-}: {
-  params: { username: string };
-}) {
-  const { theme } = useTheme();
-  const { project } = useProjectStore();
-  const [recentItemIds, setRecentItemIds] = useState<string[]>([]);
-
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [columnFilters, setColumnFilters] =
-    React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-
-  const queryLogs = useQuery<any>({
-    queryKey: ['logs'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('logs')
-        .select('*, projects(id, name)')
-        .order('created_at', { ascending: false });
-      return data;
-    },
+  const [realtime, setRealtime] = useState(true);
+  const [rowAction, setRowAction] = useState<RowAction<LogTable> | null>(null);
+  const [{ data, pageCount }, setData] = useState<TableData>({
+    data: [],
+    pageCount: 0,
   });
 
-  const table = useReactTable({
-    data: queryLogs.data || [],
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange: setRowSelection,
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    state: {
-      sorting,
-      rowSelection,
-      columnFilters,
-      columnVisibility,
+  const { table, search } = useDataTable<LogTable>({
+    data: data || [],
+    pageCount,
+    columns: columns(setRowAction),
+    filterFields: filterFields,
+    columnsSearchParams: columnsSearchParams,
+  });
+
+  const queryLogs = useQuery({
+    queryKey: ['logs', search],
+    queryFn: async () => {
+      let query = supabase.from('logs').select('*, projects(id, name)', { count: 'exact' });
+
+      if (Array.isArray(search.type) && search.type.length > 0) {
+        query.in('type', search.type);
+      }
+      if (search.function) {
+        query.ilike('function', `%${search.function}%`);
+      }
+
+      const response = await applyFiltersParamsToQuery(query, search);
+
+      setData({
+        data: response.data,
+        pageCount: Math.ceil(response.count / search.perPage),
+      });
     },
   });
 
   useEffect(() => {
+    if (!realtime) return;
     const changes = supabase
       .channel('table-logs-changes')
       .on(
@@ -267,16 +107,16 @@ export default function Page({
             projects: project,
           };
 
+          setData((prev) => {
+            return {
+              ...prev,
+              data: [enrichedLog, ...(prev?.data || [])],
+            };
+          });
+
           queryClient.setQueryData(['logs'], (prev: any[]) => {
             return [enrichedLog, ...(prev || [])];
           });
-
-          setRecentItemIds((prev) => [...prev, log.id]);
-          setTimeout(() => {
-            setRecentItemIds((prev) =>
-              prev.filter((id) => id !== log.id),
-            );
-          }, 2000);
         },
       )
       .subscribe();
@@ -284,137 +124,62 @@ export default function Page({
     return () => {
       supabase.removeChannel(changes);
     };
-  }, []);
+  }, [realtime]);
 
   return (
     <>
-      {queryLogs.isPending && <LoadingScreen />}
+      <MainContainer breadcrumbs={[{ label: 'Logs' }]}>
+        <DataTable
+          table={table}
+          loadingConfig={{
+            isLoading: queryLogs.isPending,
+            layout: {
+              columns: 6,
+              columnWidths: ['100px', '120px', '380px', '300px', '140px', '50px'],
+            },
+          }}
+        >
+          <DataTableToolbar
+            table={table}
+            filterFields={filterFields}
+            advancedFilterField={advancedFilterField(projects)}
+          >
+            <Button variant={realtime ? 'destructive' : 'outline'} size="sm" onClick={() => setRealtime((val) => !val)}>
+              Realtime
+              {realtime ? <PauseCircle /> : <PlayCircle />}
+            </Button>
 
-      <div className="flex flex-col">
-        <div className="flex items-center gap-4 pb-10 text-xs">
-          <Logs className="size-6" />
-          <TypographyH1>Logs</TypographyH1>
-        </div>
-        {/* table */}
-        <div className="">
-          <div className="flex items-center gap-2 py-4">
-            <Input
-              className="max-w-sm"
-              placeholder="Filter by function name..."
-              value={
-                (table
-                  .getColumn('function')
-                  ?.getFilterValue() as string) ?? ''
-              }
-              onChange={(event) =>
-                table
-                  .getColumn('function')
-                  ?.setFilterValue(event.target.value)
-              }
-            />
-
-            <DataTableFacetedFilter
-              key="type"
-              title="Types"
-              column={table.getColumn('type')}
-              options={LOGS_TYPES.map((type) => ({
-                label: type,
-                value: type,
-              }))}
-            />
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  aria-label="Toggle columns"
-                  variant="outline"
-                  className="ml-auto hidden lg:flex"
-                >
-                  <MixerHorizontalIcon className="size-4" />
-                  View
+              <DropdownMenuTrigger>
+                <Button variant="outline" size="sm">
+                  Copy Request
+                  <ChevronDown />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {table
-                  .getAllColumns()
-                  .filter(
-                    (column) =>
-                      typeof column.accessorFn !== 'undefined' &&
-                      column.getCanHide(),
-                  )
-                  .map((column) => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        <span className="truncate">{column.id}</span>
-                      </DropdownMenuCheckboxItem>
-                    );
-                  })}
+              <DropdownMenuContent>
+                {logExamples.map((example) => (
+                  <DropdownMenuItem
+                    key={example.label}
+                    onClick={() => {
+                      navigator.clipboard.writeText(example.code(''));
+                      toast.success(`Copied ${example.label} request to clipboard`);
+                    }}
+                  >
+                    <ClipboardIcon className="mr-2" />
+                    {example.label}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      className={cn(
-                        'transition-all duration-200',
-                        recentItemIds.includes(row.original.id) &&
-                          'bg-black/10 dark:bg-white/20',
-                      )}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          className="py-2 text-xs"
-                          key={cell.id}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
-                      No results.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      </div>
+          </DataTableToolbar>
+        </DataTable>
+      </MainContainer>
+
+      <DialogViewLogNotes
+        rowAction={rowAction}
+        open={rowAction?.action === 'view'}
+        onOpenChange={(open) => !open && setRowAction(null)}
+      />
     </>
   );
 }

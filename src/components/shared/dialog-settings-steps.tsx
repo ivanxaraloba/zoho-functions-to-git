@@ -24,7 +24,7 @@ export default function DialogSettingsSteps() {
           </span>
         </FormDescription>
       </DialogTrigger>
-      <DialogContent className="!w-7/12 !max-w-full !border-none">
+      <DialogContent className="w-7/12! max-w-full! border-none!">
         <DialogTitle>Follow these steps to copy cURL</DialogTitle>
         <ol className="list-decimal space-y-1 pl-5 text-xs">
           <li>

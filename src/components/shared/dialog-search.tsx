@@ -50,7 +50,7 @@ export default function DialogSearch({ children }: any) {
             >
               <div className="flex w-full flex-row items-center justify-between gap-y-2">
                 <div className="flex flex-col gap-0.5">
-                  <div className="flex flex-shrink items-center gap-2 truncate text-xs">
+                  <div className="flex shrink items-center gap-2 truncate text-xs">
                     <PlusCircle strokeWidth={1} className="size-4" />
                     <p>New Project</p>
                   </div>
@@ -65,7 +65,7 @@ export default function DialogSearch({ children }: any) {
             >
               <div className="flex w-full flex-row items-center justify-between gap-y-2">
                 <div className="flex flex-col gap-0.5">
-                  <div className="flex flex-shrink items-center gap-2 truncate text-xs">
+                  <div className="flex shrink items-center gap-2 truncate text-xs">
                     <PlusCircle strokeWidth={1} className="size-4" />
                     <p>New Function</p>
                   </div>
@@ -83,7 +83,7 @@ export default function DialogSearch({ children }: any) {
               >
                 <div className="flex w-full flex-row items-center justify-between gap-y-2">
                   <div className="flex flex-col gap-0.5">
-                    <p className="flex-shrink truncate pr-4 text-xs">
+                    <p className="shrink truncate pr-4 text-xs">
                       {project.name}
                     </p>
                   </div>
@@ -110,7 +110,7 @@ export default function DialogSearch({ children }: any) {
               >
                 <div className="flex w-full flex-row items-center justify-between gap-y-2">
                   <div className="flex flex-col gap-0.5">
-                    <p className="flex-shrink truncate pr-4 text-xs">
+                    <p className="shrink truncate pr-4 text-xs">
                       {fn.name}
                     </p>
                   </div>

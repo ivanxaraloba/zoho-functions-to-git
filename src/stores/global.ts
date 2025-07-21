@@ -16,10 +16,13 @@ type GlobalState = {
 export const useGlobalStore = create<GlobalState>((set) => ({
   user: null,
   getUser: async () => {
+
     const {
       data: { user: supabaseUser },
     } = await supabase.auth.getUser();
 
+    console.log({supabaseUser});
+    
     if (!supabaseUser) {
       return null;
     }

@@ -15,7 +15,7 @@ const ButtonLoading: React.FC<ButtonLoadingProps> = ({ loading = false, icon: Ic
     <Button {...props} disabled={loading || props.disabled}>
       <div className={cn('flex items-center gap-2')}>
         {children}
-        {loading ? <Loader2 className="size-4 animate-spin" /> : Icon && <Icon className="size-4" />}
+        {loading ? <Loader2 className="animate-spin" /> : Icon && <Icon />}
       </div>
     </Button>
   );

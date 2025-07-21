@@ -1,3 +1,5 @@
+import { AlertTriangle, CheckCircle, Info, LucideIcon, XCircle } from "lucide-react";
+
 export const NOTION_BITBUCKET_CREATE_PASSWORD_URL =
   'https://www.notion.so/arturloba/Bitbucket-Criar-Passwords-e2982ed9e03941a9a06a3926302686e7';
 
@@ -32,14 +34,26 @@ export const APPLICATIONS = [
   { label: 'Recruit', value: 'recruit' },
 ];
 
+export const APPLICATIONS_TYPES = ["crm", "creator", "recruit"] as const
+
 export const DEPARMENTS = {
-  FTE: 1,
-  INTERNOS: 2,
+  FTE: 2,
+  INTERNOS: 1,
 };
 
-export const LOGS_TYPES = ['success', 'error', 'warning', 'info'];
+export const LOGS_TYPES = ['success', 'error', 'warning', 'info'] as const;
 
-export const LOGS_TYPES_COLORS = {
+
+export type LogType = typeof LOGS_TYPES[number];
+
+export const LOGS_TYPES_ICONS: Record<LogType, LucideIcon> = {
+  success: CheckCircle,
+  error: XCircle,
+  warning: AlertTriangle,
+  info: Info,
+};
+
+export const LOGS_TYPES_COLORS: Record<LogType, string> = {
   [LOGS_TYPES[0]]: '74, 222, 128',
   [LOGS_TYPES[1]]: '248, 113, 113',
   [LOGS_TYPES[2]]: '250, 204, 21',

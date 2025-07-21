@@ -1,71 +1,81 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
+
+
 
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/providers/theme';
 import { javascript } from '@codemirror/lang-javascript';
 import { EditorView } from '@codemirror/view';
 import { tags as t } from '@lezer/highlight';
 import { monokai } from '@uiw/codemirror-theme-monokai';
-import CodeMirror, {
-  Decoration,
-  MatchDecorator,
-  Prec,
-  ReactCodeMirrorProps,
-  ViewPlugin,
-} from '@uiw/react-codemirror';
-import { Variable } from 'lucide-react';
+import CodeMirror, { Decoration, MatchDecorator, Prec, ReactCodeMirrorProps, ViewPlugin } from '@uiw/react-codemirror';
+import { useTheme } from 'next-themes';
 import { createTheme } from 'thememirror';
+
+
+
+
+
 
 import '@/assets/styles/code-viewer.css';
 
-import { CONFIG_FUNCTION_VARIABLE } from '@/utils/constants';
 
-import { Button } from '../ui/button';
+
+
 
 interface ScriptViewerProps extends ReactCodeMirrorProps {
   value?: string;
+  search?: string;
   onChange?: (value: string, viewUpdate: any) => void;
   className?: string;
+  editable?: boolean;
+  highlightWord?: string;
 }
 
-const decoratorHashtag = new MatchDecorator({
-  regexp: CONFIG_FUNCTION_VARIABLE.REGEX,
-  decoration: Decoration.mark({
-    attributes: {
-      style: `
-       color: #FF00FF;
-       font-weight: 800;
-       `,
-    },
-  }),
-});
+function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
-const hightlightHashtag = ViewPlugin.fromClass(
-  class {
-    constructor(view: any) {
-      // @ts-ignore
-      this.decorations = decoratorHashtag.createDeco(view);
-    }
-    update(update: any) {
-      // @ts-ignore
-      this.decorations = decoratorHashtag.updateDeco(
-        update,
+function createHighlightPlugin(word: string) {
+  if (!word) return null;
+
+  const safeWord = escapeRegExp(word);
+  const decorator = new MatchDecorator({
+    regexp: new RegExp(safeWord, 'gi'),
+    decoration: Decoration.mark({
+      attributes: {
+        style: `
+          color: #000;
+          font-weight: 800;
+          background: #FFFF00;
+        `,
+      },
+    }),
+  });
+
+  return ViewPlugin.fromClass(
+    class {
+      decorations: any;
+      constructor(view: EditorView) {
         // @ts-ignore
-        this.decorations,
-      );
-    }
-  },
-  {
-    // @ts-ignore
-    decorations: (v) => v.decorations,
-  },
-);
+        this.decorations = decorator.createDeco(view);
+      }
+      update(update: any) {
+        // @ts-ignore
+        this.decorations = decorator.updateDeco(update, this.decorations);
+      }
+    },
+    {
+      decorations: (v: any) => v.decorations,
+    },
+  );
+}
 
 function ScriptViewer({
   value,
   onChange,
   className,
   editable = false,
+  highlightWord = '',
   ...props
 }: ScriptViewerProps) {
   const { theme } = useTheme();
@@ -97,6 +107,12 @@ function ScriptViewer({
     ],
   });
 
+  // Memoize the highlight plugin so it updates only when highlightWord changes
+  const highlightPlugin = useMemo(() => {
+    const plugin = createHighlightPlugin(highlightWord);
+    return plugin ? [Prec.highest(plugin)] : [];
+  }, [highlightWord]);
+
   return (
     <div>
       <CodeMirror
@@ -110,14 +126,10 @@ function ScriptViewer({
           lineNumbers: false,
           foldGutter: false,
         }}
-        // onStatistics={(e) => console.log({ onStatistics: e })}
-        className={cn('!border-none !outline-none', className)}
+        className={cn('border-none! outline-hidden!', className)}
         value={value || ''}
         theme={theme === 'light' ? myTheme : monokai}
-        extensions={[
-          javascript({ jsx: true }),
-          Prec.highest(hightlightHashtag),
-        ]}
+        extensions={[javascript({ jsx: true }), ...highlightPlugin]}
         onChange={onChange}
         editable={editable}
         {...props}

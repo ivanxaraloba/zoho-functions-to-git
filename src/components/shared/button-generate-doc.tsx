@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { chatgptGenerateFunctionDoc } from '@/helpers/chatgpt';
+import { chatgptGenerateFunctionDoc } from '@/lib/chatgpt';
 import { useMutation } from '@tanstack/react-query';
 import { saveAs } from 'file-saver';
 import htmlDocx from 'html-docx-js/dist/html-docx';
@@ -112,7 +112,7 @@ export default function ButtonGenerateDoc({
             <>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                className="prose prose-sm max-h-[500px] w-full !max-w-none overflow-auto dark:prose-invert"
+                className="prose prose-sm max-h-[500px] w-full max-w-none! overflow-auto dark:prose-invert"
               >
                 {docContent}
               </ReactMarkdown>

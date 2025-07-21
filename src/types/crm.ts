@@ -3,7 +3,7 @@ interface WorkflowParam {
   type: string;
 }
 
-interface Workflow {
+export interface WorkflowBase {
   name: string;
   namespace: string;
   params: WorkflowParam[];
@@ -39,7 +39,7 @@ export interface crmFunction {
   tasks: Tasks;
 }
 
-interface Workflow {
+export interface Workflow {
   return_type: string;
   modified_on: number;
   updatedTime: string;

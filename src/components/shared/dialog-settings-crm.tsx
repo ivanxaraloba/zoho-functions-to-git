@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { crmGetFunctions } from '@/helpers/zoho/crm';
+import { crmGetFunctions } from '@/lib/zoho/crm';
 import { supabase } from '@/lib/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -143,7 +143,7 @@ export default function DialogSettingsCRM2() {
                           </span>
                         </FormDescription>
                       </DialogTrigger>
-                      <DialogContent className="!w-7/12 !max-w-full !border-none">
+                      <DialogContent className="w-7/12! max-w-full! border-none!">
                         <DialogTitle>
                           Follow these steps to copy cURL
                         </DialogTitle>

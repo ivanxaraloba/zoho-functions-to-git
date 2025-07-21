@@ -3,7 +3,12 @@
 import React from 'react';
 
 import { useQuery } from '@tanstack/react-query';
-import { Logs, PanelsTopLeft, Parentheses } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Logs,
+  PanelsTopLeft,
+  Parentheses,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import Sidebar from '@/components/layout/sidebar';
@@ -11,9 +16,10 @@ import FormSetupBitbucket from '@/components/shared/form-setup-bitbucket';
 import LoadingScreen from '@/components/shared/loading-screen';
 import { useGlobalStore } from '@/stores/global';
 
-import PageLogin from '../login/page';
+import PageLogin from '../(auth)/login/page';
 
 const routes = [
+  { name: 'Analytics', icon: LayoutDashboard, to: '/' },
   { name: 'Projects', icon: PanelsTopLeft, to: '/projects' },
   { name: 'Functions', icon: Parentheses, to: '/functions' },
   { name: 'Logs', icon: Logs, to: '/logs' },
@@ -25,7 +31,7 @@ export default function Layout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { user, getUser, getFunctions, getProjects, getDepartments } =
+  let { user, getUser, getFunctions, getProjects, getDepartments } =
     useGlobalStore();
 
   const queryUser = useQuery({
@@ -39,12 +45,7 @@ export default function Layout({
   if (queryUser.isLoading) return <LoadingScreen />;
   if (!user) return <PageLogin />;
   if (!user.profile) return <FormSetupBitbucket />;
-  if (pathname.includes('/projects/')) return <>{children}</>;
+  // if (pathname.includes('/projects/')) return <>{children}</>;
 
-  return (
-    <div className="flex">
-      <Sidebar routes={routes} />
-      <div className="ml-52 w-full px-10 py-8">{children}</div>
-    </div>
-  );
+  return children;
 }

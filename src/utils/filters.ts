@@ -1,4 +1,7 @@
 import { searchMatches } from '@/types/types';
+import {
+  type Table as TanstackTable,
+} from '@tanstack/react-table';
 
 export const matchByWords = (
   record: Record<string, any>,
@@ -32,3 +35,4 @@ export const matchByWords = (
     return typeof fieldValue === 'string' && matches(fieldValue);
   });
 };
+

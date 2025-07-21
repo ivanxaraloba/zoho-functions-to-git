@@ -62,7 +62,7 @@ export default function FormSetupBitbucket() {
 
   return (
     <div className="fixed left-0 top-0 z-10 flex h-full w-full items-center justify-center bg-background/50">
-      <div className="flex w-full max-w-[650px] flex-col justify-center bg-background px-8 text-left shadow-sm">
+      <div className="flex w-full max-w-[650px] flex-col justify-center bg-background px-8 text-left shadow-xs">
         <TypographyH1 className="pb-4 text-center">Complete your account</TypographyH1>
         <div className="flex flex-col gap-[15px]">
           <Form {...form}>

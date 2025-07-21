@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 
-import { crmGetFunction, crmGetFunctions } from '@/helpers/zoho/crm';
+import { crmGetFunction, crmGetFunctions } from '@/lib/zoho/crm';
 import { supabase } from '@/lib/supabase/client';
-import { CRMFunctions } from '@/types/applications';
+import { CRMFunction } from '@/types/applications';
 import { Project } from '@/types/types';
 import { useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';

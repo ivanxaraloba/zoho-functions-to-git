@@ -39,7 +39,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import DialogSettingsSteps from './dialog-settings-steps';
 import VideoPlayerSettings from './video-player-settings';
-import { creatorGetApplications } from '@/helpers/zoho/creator';
+import { creatorGetApplications } from '@/lib/zoho/creator';
 
 const formSchema = z.object({
   owner: z.string().min(1),

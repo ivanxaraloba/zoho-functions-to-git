@@ -2,30 +2,16 @@
 
 import { useState } from 'react';
 
-import { PopoverClose } from '@radix-ui/react-popover';
-import {
-  CirclePlus,
-  PlusIcon,
-  SlidersHorizontal,
-  X,
-} from 'lucide-react';
-import Link from 'next/link';
+import { CirclePlus } from 'lucide-react';
 
+import MainContainer from '@/components/layout/main-container';
 import CardProject from '@/components/shared/card-project';
 import DialogCreateProject from '@/components/shared/dialog-create-project';
 import PopoverFilters from '@/components/shared/popover-filters';
-import { TypographyH1 } from '@/components/typography/typography-h1';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import InputSearch from '@/components/ui/input-search';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { useGlobalStore } from '@/stores/global';
 import { useFilters } from '@/hooks/use-filters';
 import { APPLICATIONS } from '@/utils/constants';
@@ -67,27 +53,23 @@ export default function Page() {
   });
 
   return (
-    <div className="">
-      <div className="flex items-center gap-4 pb-10 text-xs">
-        <TypographyH1>Projects</TypographyH1>
-        <DialogCreateProject open={open} onOpenChange={setOpen}>
-          <Button className="ml-auto text-start">
-            <CirclePlus className="size-4" />
-            <span>New project</span>
-          </Button>
-        </DialogCreateProject>
-      </div>
+    <MainContainer
+      breadcrumbs={[{ label: 'Projects', current: true }]}
+    >
       <div className="flex items-center gap-3">
-        <InputSearch
-          placeholder="Search Project"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          setSearchMatches={setSearchMatches}
-          searchMatches={{
-            caseSensitive: searchMatches.caseSensitive,
-            wholeWord: searchMatches.wholeWord,
-          }}
-        />
+        <div className="w-full max-w-sm">
+          <InputSearch
+            autoFocus
+            placeholder="Search Project"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            setSearchMatches={setSearchMatches}
+            searchMatches={{
+              caseSensitive: searchMatches.caseSensitive,
+              wholeWord: searchMatches.wholeWord,
+            }}
+          />
+        </div>
         <PopoverFilters count={filtersCount}>
           <div className="space-y-1.5">
             <Label>Departments</Label>
@@ -115,12 +97,20 @@ export default function Page() {
             />
           </div>
         </PopoverFilters>
+        <div className="ml-auto">
+          <DialogCreateProject open={open} onOpenChange={setOpen}>
+            <Button size="sm" className="ml-auto text-start">
+              <CirclePlus className="size-4" />
+              <span>New project</span>
+            </Button>
+          </DialogCreateProject>
+        </div>
       </div>
       <div className="mt-4 space-y-4">
         {data?.map((project, index) => (
           <CardProject key={index} project={project} />
         ))}
       </div>
-    </div>
+    </MainContainer>
   );
 }

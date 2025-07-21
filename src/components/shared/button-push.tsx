@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { createRepository, getRepository, pushCommit } from '@/helpers/bitbucket';
+import { createRepository, getRepository, pushCommit } from '@/lib/bitbucket';
 import { supabase } from '@/lib/supabase/client';
 import { Commit, Project } from '@/types/types';
 import { zodResolver } from '@hookform/resolvers/zod';

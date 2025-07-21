@@ -1,15 +1,17 @@
 import React from 'react';
 
 import { Commit } from '@/types/types';
-import { History, Meh } from 'lucide-react';
+import { History, HistoryIcon, Meh } from 'lucide-react';
 
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 import { Button } from '../ui/button';
 import CardCommit from './card-commit';
@@ -19,25 +21,18 @@ export default function ButtonCommitsHistory({ commits = [] }: { commits: Commit
   return (
     <Dialog>
       <DialogTrigger>
-        <Button variant="ghost" size="icon">
-          <History className="size-4" />
+        <Button variant="ghost" size="sm">
+          <History className="!size-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Commits</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete your account and remove your data from our
+            servers.
+          </DialogDescription>
         </DialogHeader>
-        <div className="flex max-h-80 flex-col gap-4 overflow-auto pr-2">
-          {commits.length ? (
-            <div className="flex flex-col divide-y rounded-md border">
-              {commits.map((commit: Commit) => (
-                <CardCommit key={commit.id} commit={commit} />
-              ))}
-            </div>
-          ) : (
-            <SectionMissing icon={Meh} message="No commits have been made yet" />
-          )}
-        </div>
       </DialogContent>
     </Dialog>
   );

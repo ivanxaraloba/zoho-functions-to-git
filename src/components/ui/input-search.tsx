@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { InputHTMLAttributes } from 'react';
 
 import { cn } from '@/lib/utils';
 import { ALargeSmall, WholeWord } from 'lucide-react';
@@ -6,32 +6,34 @@ import { ALargeSmall, WholeWord } from 'lucide-react';
 import { Button } from './button';
 import { Input } from './input';
 
-interface Props {
-  placeholder?: string;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+interface Props extends InputHTMLAttributes<HTMLInputElement> {
   searchMatches: { caseSensitive?: boolean; wholeWord?: boolean };
-  setSearchMatches: any;
+  setSearchMatches: (updates: { [key: string]: any }) => void;
 }
 
 export default function InputSearch({
   searchMatches,
   setSearchMatches,
+  className,
   ...inputProps
 }: Props) {
   return (
     <div className="relative flex w-full items-center">
       <div className={cn('flex w-full items-center')}>
-        <Input {...inputProps} />
+        <Input className={cn(className, 'h-8')} {...inputProps} />
       </div>
       <div className="absolute right-3 flex items-center gap-1">
         {searchMatches.hasOwnProperty('caseSensitive') && (
           <Button
-            variant={searchMatches.caseSensitive ? 'secondary' : 'ghost'}
+            variant={
+              searchMatches.caseSensitive ? 'secondary' : 'ghost'
+            }
             size="icon"
             className="size-6 rounded-sm"
             onClick={() =>
-              setSearchMatches({ caseSensitive: !searchMatches.caseSensitive })
+              setSearchMatches({
+                caseSensitive: !searchMatches.caseSensitive,
+              })
             }
           >
             <ALargeSmall className="w-4" />
@@ -42,7 +44,11 @@ export default function InputSearch({
             variant={searchMatches.wholeWord ? 'secondary' : 'ghost'}
             size="icon"
             className="size-6 rounded-sm"
-            onClick={() => setSearchMatches({ wholeWord: !searchMatches.wholeWord })}
+            onClick={() =>
+              setSearchMatches({
+                wholeWord: !searchMatches.wholeWord,
+              })
+            }
           >
             <WholeWord className="w-4" />
           </Button>

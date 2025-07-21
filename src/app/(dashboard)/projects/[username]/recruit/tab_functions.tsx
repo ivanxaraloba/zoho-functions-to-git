@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 
-import { recruitGetFunction, recruitGetFunctions } from '@/helpers/zoho/recruit';
+import { recruitGetFunction, recruitGetFunctions } from '@/lib/zoho/recruit';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
-import { CRMFunctions } from '@/types/applications';
+import { CRMFunction } from '@/types/applications';
 import { Commit } from '@/types/types';
 import { Label } from '@radix-ui/react-label';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -418,7 +418,7 @@ export default function TabFunctions({ username }: { username: string }) {
                           <CollapsibleContent className="mt-4">
                             {items?.length > 0 && (
                               <div className="flex flex-col gap-2">
-                                {items.map((functionInfo: CRMFunctions, i: number) => {
+                                {items.map((functionInfo: CRMFunction, i: number) => {
                                   return (
                                     <ListItemFunction
                                       key={i}
@@ -461,7 +461,7 @@ export default function TabFunctions({ username }: { username: string }) {
                           functionInfo={activeFn}
                           path={PATH_TAB}
                           refetchCommits={queryCommits.refetch}
-                          className={cn(isToCommit(activeFn) && '!text-yellow-400')}
+                          className={cn(isToCommit(activeFn) && 'text-yellow-400!')}
                         />
                         <ButtonCommitsHistory
                           commits={queryCommits.data?.obj[activeFn.id]}

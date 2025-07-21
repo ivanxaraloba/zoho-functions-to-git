@@ -1,4 +1,4 @@
-export interface CRMFunctions {
+export interface CRMFunction {
   id: string;
   name: string;
   tasks: {

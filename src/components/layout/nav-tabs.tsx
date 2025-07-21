@@ -83,7 +83,7 @@ const AnimatedNavTabs = ({
               data-id={tab.id}
               onClick={() => onTabClick(tab.id)}
               className={cn(
-                'relative z-10 inline-flex h-11 cursor-pointer items-center justify-center whitespace-nowrap rounded-none bg-transparent px-4 text-xs text-muted-foreground shadow-none ring-offset-background transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-foreground data-[state=active]:shadow-none',
+                'relative z-10 inline-flex h-11 cursor-pointer items-center justify-center whitespace-nowrap rounded-none bg-transparent px-4 text-xs text-muted-foreground shadow-none ring-offset-background transition-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-foreground data-[state=active]:shadow-none',
                 tab.id === activeTabId && 'text-foreground',
               )}
             >
@@ -103,7 +103,7 @@ const AnimatedNavTabs = ({
             ref={tabIndicatorRef}
             className={`absolute bottom-0 z-10 transition-all ${springy ? 'ease-spring-4 duration-200' : 'duration-150 ease-linear'}`}
           >
-            <div className="h-[1px] bg-primary" />
+            <div className="h-px bg-primary" />
           </div>
         </div>
       </div>
