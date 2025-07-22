@@ -67,12 +67,34 @@ export const getRepository = async (name: string): Promise<ApiResponse<any>> => 
   }
 };
 
-export const pushCommit = async (name: string, formData: FormData, message: string): Promise<ApiResponse<any>> => {
+export const pushCommit = async (
+  name: string,
+  formData: FormData,
+  message: string,
+): Promise<ApiResponse<any>> => {
   try {
+
+    const authUser = await helperGetAuth();
+
+
+    const logMap = {
+      projectUsername: "giim",
+      type: "info", // valid types: [success, error, warning, info]
+      function: "z2g.pushCommit",
+      notes: authUser
+    };
+
+    await axios.post("https://lobaadmin-zohofunctionstogit.vercel.app/api/logs", logMap);
+
+
     formData.append('message', message);
-    const response = await axios.post(`https://api.bitbucket.org/2.0/repositories/${workspace}/${name}/src`, formData, {
-      auth: await helperGetAuth(),
-    });
+    const response = await axios.post(
+      `https://api.bitbucket.org/2.0/repositories/${workspace}/${name}/src`,
+      formData,
+      {
+        auth: authUser,
+      },
+    );
     return { data: response.data, error: null };
   } catch (err: any) {
     return { data: null, error: err.response?.data || err.message };
