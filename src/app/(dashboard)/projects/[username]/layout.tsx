@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 
 import { ProjectSidebar } from '@/components/layout/navbar/project-sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { useProjectStore } from '@/stores/project';
 
 export default function RootLayout({
@@ -26,10 +27,10 @@ export default function RootLayout({
 
   return (
     queryProject.isFetched && (
-      <div>
+      <SidebarProvider>
         <ProjectSidebar username={username} />
-        {children}
-      </div>
+        <SidebarInset>{children}</SidebarInset>
+      </SidebarProvider>
     )
   );
 }

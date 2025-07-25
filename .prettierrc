@@ -1,5 +1,5 @@
 {
-  "printWidth": 120,
+  "printWidth": 90,
   "singleQuote": true,
   "trailingComma": "all",
   "plugins": [
@@ -28,5 +28,7 @@
     ".css$"
   ],
   "importOrderTypeScriptVersion": "5.0.0",
-  "tailwindFunctions": ["clsx"]
+  "tailwindFunctions": [
+    "clsx"
+  ]
 }

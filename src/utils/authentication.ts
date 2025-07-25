@@ -43,9 +43,6 @@ export async function signOut() {
 
 export async function signInWithProvider(provider: 'bitbucket') {
   const supabase = createClient();
-  console.log("1221");
-  
-
   const redirectTo = process.env.NEXT_PUBLIC_VERCEL_URL
     ? `${process.env.NEXT_PUBLIC_VERCEL_URL}/auth/callback`
     : 'http://localhost:3000/auth/callback';
@@ -56,9 +53,6 @@ export async function signInWithProvider(provider: 'bitbucket') {
       redirectTo,
     },
   });
-
-  console.log({response});
-  
 
   return response;
 }

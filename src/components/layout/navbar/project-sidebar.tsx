@@ -106,7 +106,7 @@ export function ProjectSidebar({ username, ...props }: { username: string } & Re
   };
 
   return (
-    <Sidebar  collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <Link href="/">
           <SidebarMenuButton
@@ -118,7 +118,7 @@ export function ProjectSidebar({ username, ...props }: { username: string } & Re
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">loba z2g</span>
-              <span className="truncate text-xs text-muted-foreground">v2.0</span>
+              <span className="text-muted-foreground truncate text-xs">v2.0</span>
             </div>
           </SidebarMenuButton>
         </Link>

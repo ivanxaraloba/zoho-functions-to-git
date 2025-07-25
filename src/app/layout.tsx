@@ -33,10 +33,7 @@ export default function RootLayout({
             <NuqsAdapter>
               <Analytics />
               <Toaster richColors />
-              <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset className="m-0!">{children}</SidebarInset>
-              </SidebarProvider>
+              {children}
             </NuqsAdapter>
           </ThemeProvider>
         </body>

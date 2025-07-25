@@ -31,7 +31,7 @@ export default function BadgeApplication({ application, onClick, target, href, c
   if (href) {
     return (
       <Link href={href} target={target} onClick={onClick}>
-        <Badge variant="outline" className={cn('gap-2 rounded-full hover:bg-secondary', className)}>
+        <Badge variant="outline" className={cn('hover:bg-secondary gap-2 rounded-full', className)}>
           {badgeContent}
         </Badge>
       </Link>

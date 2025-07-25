@@ -186,3 +186,13 @@ export interface IBitbucketRepository {
     has_issues: boolean;
     has_wiki: boolean;
 }
+
+export interface IProjectWithRelations extends ProjectTable {
+    departments: DepartmentTable | null;
+    crm: { id: CRMTable['id'] } | null;
+    creator: {
+        id: CreatorTable['id']
+        creatorApps: { id: CreatorAppsTable['id'] }[];
+    } | null
+    recruit: { id: RecruitTable['id'] } | null;
+}

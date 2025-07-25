@@ -82,7 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">loba z2g</span>
-              <span className="truncate text-xs text-muted-foreground">v2.0</span>
+              <span className="text-muted-foreground truncate text-xs">v2.0</span>
             </div>
           </SidebarMenuButton>
         </Link>

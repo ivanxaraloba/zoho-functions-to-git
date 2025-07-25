@@ -6,96 +6,53 @@ import { getRepository } from '@/lib/bitbucket';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { crmGetFunction, crmGetFunctions } from '@/lib/zoho/crm';
-import { crmFunction, Workflow } from '@/types/crm';
-import { IBitbucketRepository, IFunctionCrm, IFunctionCrmRaw } from '@/types/fixed-types';
+import { Workflow } from '@/types/crm';
+import { IBitbucketRepository, IFunctionCrm } from '@/types/fixed-types';
 import { Commit } from '@/types/types';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
 import {
-  ArrowUpFromLine,
-  ArrowUpRightFromSquare,
   Ban,
   Check,
   ChevronDown,
   ChevronRight,
-  ChevronsUpDown,
   Circle,
-  CircleAlert,
-  CircleCheck,
-  CircleDashed,
   CircleFadingArrowUp,
-  CircleFadingArrowUpIcon,
   CircleMinus,
-  CircleOff,
-  Dot,
-  Frown,
   History,
-  HistoryIcon,
-  LucideAArrowDown,
-  Parentheses,
-  RefreshCcw,
-  SearchX,
-  ShieldAlert,
-  SquareArrowOutUpRight,
-  TriangleAlert,
   X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { parseAsString, useQueryState } from 'nuqs';
-import { toast } from 'sonner';
 
-import { DataTable } from '@/components/data-table/data-table';
 import { RowAction, TableData } from '@/components/data-table/data-table-config';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
-import {
-  AppTabContent,
-  AppTabContentBody,
-  AppTabContentHead,
-  AppTabContentMissing,
-  AppTabDescription,
-  AppTabHeader,
-} from '@/components/layout/app-tab';
-import ButtonCommitsHistory from '@/components/shared/button-commits-history';
-import { ButtonCommitsNew } from '@/components/shared/button-commits-new';
-import ButtonGenerateDoc from '@/components/shared/button-generate-doc';
-import { ButtonPush } from '@/components/shared/button-push';
-import CardCommit from '@/components/shared/card-commit';
 import CardContainer from '@/components/shared/card-container';
-import ListHeaderFunction from '@/components/shared/list-header-functions';
-import ListItemFunction from '@/components/shared/list-item-function';
-import PopoverFilters from '@/components/shared/popover-filters';
 import ScriptViewer from '@/components/shared/script-viewer';
-import SectionMissing from '@/components/shared/section-missing';
 import TooltipIcon from '@/components/shared/tooltip-icon';
-import { TypographyH2 } from '@/components/typography/typography-h2';
-import { TypographyH3 } from '@/components/typography/typography-h3';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import ButtonLoading from '@/components/ui/button-loading';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import Description from '@/components/ui/description';
 import { Input } from '@/components/ui/input';
-import InputSearch from '@/components/ui/input-search';
-import { Label } from '@/components/ui/label';
-import { MultiSelect } from '@/components/ui/multi-select';
-import { ScrollBar } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGlobalStore } from '@/stores/global';
 import { useProjectStore } from '@/stores/project';
 import { useDataTable } from '@/hooks/use-data-table';
-import { useFilters } from '@/hooks/use-filters';
-import { DEPARMENTS, FUNCTIONS_CATEGORIES_LIST, FUNCTIONS_CATEGORIES_OBJ } from '@/utils/constants';
-import { matchByWords } from '@/utils/filters';
 import { arr, getRepositoryName, time } from '@/utils/generic';
 import { applyFiltersParamsToQuery } from '@/utils/query';
 import LogoBitbucket from '@/assets/img/logo-bitbucket';
 
-import { Json } from '../../../../../../../database.types';
-import { advancedFilterField, columns, columnsSearchParams, filterFields } from './columns';
+import {
+  advancedFilterField,
+  columns,
+  columnsSearchParams,
+  filterFields,
+} from './columns';
 import FunctionSummary from './function-summary';
 
 const PATH_TAB = 'crm/functions';
@@ -109,8 +66,14 @@ export default function TabFunctions({ username }: { username: string }) {
   const { project, getProject, getCRM } = useProjectStore();
 
   const [showCommits, setShowCommits] = useState(false);
-  const [activeFnId, setActiveFnId] = useQueryState('function', parseAsString.withDefault(''));
-  const [activeCommitId, setActiveCommitId] = useQueryState('commit', parseAsString.withDefault(''));
+  const [activeFnId, setActiveFnId] = useQueryState(
+    'function',
+    parseAsString.withDefault(''),
+  );
+  const [activeCommitId, setActiveCommitId] = useQueryState(
+    'commit',
+    parseAsString.withDefault(''),
+  );
 
   const [rowAction, setRowAction] = useState<RowAction<Workflow> | null>(null);
   const [{ data, pageCount }, setData] = useState<TableData>({
@@ -154,10 +117,15 @@ export default function TabFunctions({ username }: { username: string }) {
     queryKey: ['project_crm_functions_3', username, search],
     queryFn: async () => {
       if (!project?.id) throw new Error('Project Id is Null');
-      let query = supabase.from('crmFunctions').select('*').eq('crmProjectId', project?.id);
+      let query = supabase
+        .from('crmFunctions')
+        .select('*')
+        .eq('crmProjectId', project?.id);
 
       if (search.search) {
-        query = query.or(`display_name.ilike.%${search.search}%,script.ilike.%${search.search}%`);
+        query = query.or(
+          `display_name.ilike.%${search.search}%,script.ilike.%${search.search}%`,
+        );
       }
 
       const response = await applyFiltersParamsToQuery(query, search);
@@ -192,24 +160,23 @@ export default function TabFunctions({ username }: { username: string }) {
   });
 
   const activeCommit = useMemo(() => {
-    console.log(activeFnId);
-    console.log(queryCommits.data?.arr);
-
     const find =
-      queryCommits.data?.arr?.find((c: Commit) => String(c.id) === activeCommitId && c.functionId === activeFnId) ||
-      null;
+      queryCommits.data?.arr?.find(
+        (c: Commit) => String(c.id) === activeCommitId && c.functionId === activeFnId,
+      ) || null;
 
     if (!find) setActiveCommitId(null);
 
     return find;
   }, [activeCommitId, activeFnId, queryCommits.data]) as Commit;
-  console.log({ activeCommit });
 
   const { data: repository } = useQuery<IBitbucketRepository>({
     queryKey: ['repository', username],
     queryFn: async () => {
       if (!project?.id) throw new Error('Project Id is Null');
-      const response = await getRepository(getRepositoryName(project.domain, project.username));
+      const response = await getRepository(
+        getRepositoryName(project.domain, project.username),
+      );
       return response.data;
     },
     enabled: !!project?.id,
@@ -223,9 +190,13 @@ export default function TabFunctions({ username }: { username: string }) {
   const mutationRefresh = useMutation({
     mutationFn: async () => {
       try {
-        if (!project || !queryCrm.data?.config) throw new Error('Project/crmApp data is not available.');
+        if (!project || !queryCrm.data?.config)
+          throw new Error('Project/crmApp data is not available.');
 
-        const { data: rawFns, error: fetchError } = await crmGetFunctions(project.domain, queryCrm.data.config);
+        const { data: rawFns, error: fetchError } = await crmGetFunctions(
+          project.domain,
+          queryCrm.data.config,
+        );
         if (fetchError || !rawFns) throw new Error('Failed to fetch functions');
 
         const lastSync = queryCrm.data?.lastSync;
@@ -238,7 +209,11 @@ export default function TabFunctions({ username }: { username: string }) {
 
         const recentFnsWithCode = await Promise.all(
           recentFns.map(async (fn) => {
-            const { data, error } = await crmGetFunction(project.domain, queryCrm.data.config, fn);
+            const { data, error } = await crmGetFunction(
+              project.domain,
+              queryCrm.data.config,
+              fn,
+            );
             if (error || !data) return null;
 
             const { modified_on, ...cleanData } = data;
@@ -269,11 +244,14 @@ export default function TabFunctions({ username }: { username: string }) {
     },
   });
 
-  console.log(queryCommits.data);
-
   return (
     <>
-      <FunctionSummary project={project} repository={repository} crm={queryCrm.data} functions={queryFunctions.data} />
+      <FunctionSummary
+        project={project}
+        repository={repository}
+        crm={queryCrm.data}
+        functions={queryFunctions.data}
+      />
       <div className="mt-6 flex flex-col gap-2.5">
         <DataTableToolbar
           table={table}
@@ -282,7 +260,7 @@ export default function TabFunctions({ username }: { username: string }) {
           hideViewOptions
           fitScreen
         />
-        <div className="grid h-[calc(100vh-90px)] grid-cols-5 gap-4">
+        <div className="grid h-[calc(100vh-90px)] grid-cols-4 gap-4">
           <CardContainer className="h-full space-y-1 overflow-auto">
             {queryFunctions.isPending && (
               <>
@@ -317,10 +295,18 @@ export default function TabFunctions({ username }: { username: string }) {
                         <span className="truncate text-xs">{fn.display_name}</span>
                         <div className="ml-auto space-x-2">
                           {fn.script?.length < 50 && (
-                            <TooltipIcon icon={Ban} text="Function is too short" className="text-red-400" />
+                            <TooltipIcon
+                              icon={Ban}
+                              text="Function is too short"
+                              className="text-red-400"
+                            />
                           )}
                           {!queryCommits.data?.obj[fn.id] && (
-                            <TooltipIcon icon={CircleMinus} text={'Never commited'} className="text-gray-400" />
+                            <TooltipIcon
+                              icon={CircleMinus}
+                              text={'Never commited'}
+                              className="text-gray-400"
+                            />
                           )}
                           {time.fixTime(fn.updatedTime) >= queryCrm.data?.lastCommit && (
                             <TooltipIcon
@@ -337,7 +323,12 @@ export default function TabFunctions({ username }: { username: string }) {
               </Collapsible>
             ))}
           </CardContainer>
-          <CardContainer className={cn('relative overflow-y-auto pt-0', showCommits ? 'col-span-3' : 'col-span-4')}>
+          <CardContainer
+            className={cn(
+              'relative overflow-y-auto pt-0',
+              showCommits ? 'col-span-2' : 'col-span-3',
+            )}
+          >
             {activeFn && (
               <>
                 <div className="bg-card sticky top-0 z-10 flex w-full items-center border-b py-4">
@@ -346,7 +337,9 @@ export default function TabFunctions({ username }: { username: string }) {
                       <span className="text-sm font-medium">{activeFn.display_name}</span>
                       {activeCommit?.id && (
                         <span className="ml-3 flex items-center gap-2">
-                          <span className="text-muted-foreground text-xs font-medium">{activeCommit.message}</span>
+                          <span className="text-muted-foreground text-xs font-medium">
+                            {activeCommit.message}
+                          </span>
                           {activeCommit.status === 'committed' ? (
                             <Check className="!size-3.5 text-green-400" />
                           ) : (
@@ -355,7 +348,9 @@ export default function TabFunctions({ username }: { username: string }) {
                         </span>
                       )}
                     </div>
-                    <Description>Last update: {time.friendlyTime(activeFn.updatedTime)}</Description>
+                    <Description>
+                      Last update: {time.friendlyTime(activeFn.updatedTime)}
+                    </Description>
                   </div>
                   <div className="ml-auto flex items-center">
                     <Link
@@ -366,14 +361,22 @@ export default function TabFunctions({ username }: { username: string }) {
                         <LogoBitbucket className="!size-3.5" />
                       </Button>
                     </Link>
-                    <Button onClick={() => setShowCommits(true)} variant="ghost" size="sm">
+                    <Button
+                      onClick={() => setShowCommits(true)}
+                      variant="ghost"
+                      size="sm"
+                    >
                       <History className="!size-3.5" />
                     </Button>
                   </div>
                 </div>
                 <ScriptViewer
                   className="h-full w-full pt-4"
-                  value={activeCommit?.id ? activeCommit?.function?.script : activeFn?.script || ''}
+                  value={
+                    activeCommit?.id
+                      ? activeCommit?.function?.script
+                      : activeFn?.script || ''
+                  }
                   highlightWord={String(search.search)}
                 />
               </>
@@ -384,7 +387,12 @@ export default function TabFunctions({ username }: { username: string }) {
               <div className="flex">
                 <span className="text-sm font-medium">Commits</span>
                 <div className="ml-auto">
-                  <Button onClick={() => setShowCommits(false)} variant="ghost" size="icon" className="!size-8">
+                  <Button
+                    onClick={() => setShowCommits(false)}
+                    variant="ghost"
+                    size="icon"
+                    className="!size-8"
+                  >
                     <X className="!size-3.5" />
                   </Button>
                 </div>
@@ -408,7 +416,9 @@ export default function TabFunctions({ username }: { username: string }) {
                   </div>
                   <div className="flex flex-col items-start">
                     <span className="truncate text-sm font-medium">Current Version</span>
-                    <span className="text-muted-foreground truncate text-xs font-normal">Last synced version</span>
+                    <span className="text-muted-foreground truncate text-xs font-normal">
+                      Last synced version
+                    </span>
                   </div>
                 </Button>
                 {queryCommits.data?.obj[activeFn.id].map((commit: Commit) => (
@@ -428,7 +438,9 @@ export default function TabFunctions({ username }: { username: string }) {
                       )}
                     </div>
                     <div className="flex flex-col items-start">
-                      <span className="truncate text-sm font-medium">{commit.message}</span>
+                      <span className="truncate text-sm font-medium">
+                        {commit.message}
+                      </span>
                       <span className="text-muted-foreground truncate text-xs font-normal">
                         {commit.users.bbUsername}, {time.friendlyTime(commit.created_at)}
                       </span>

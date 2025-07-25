@@ -5,7 +5,11 @@ import { ChevronRightIcon } from '@radix-ui/react-icons';
 import { type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -43,8 +47,13 @@ export function NavMain({
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title} size="sm" isActive={item.isActive}>
-                <Link href={item.url}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                size="sm"
+                isActive={item.isActive}
+              >
+                <Link  href={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
                 </Link>
@@ -62,7 +71,7 @@ export function NavMain({
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <Link href={subItem.url}>
+                            <Link prefetch={false} href={subItem.url}>
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>
