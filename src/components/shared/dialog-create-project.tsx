@@ -11,8 +11,28 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useGlobalStore } from '@/stores/global';
 import { str } from '@/utils/generic';
 
@@ -76,7 +96,9 @@ export default function DialogCreateProject({
   useEffect(() => {
     const name = form.watch('name');
     if (!name) return;
-    form.setValue('username', str.slugify(name), { shouldValidate: true });
+    form.setValue('username', str.slugify(name), {
+      shouldValidate: true,
+    });
   }, [form.watch('name')]);
 
   return (
@@ -87,7 +109,10 @@ export default function DialogCreateProject({
           <DialogTitle>Create Project</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col items-center justify-center gap-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col items-center justify-center gap-4"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -121,14 +146,19 @@ export default function DialogCreateProject({
                 <FormItem>
                   <FormLabel>Domain</FormLabel>
                   <FormControl>
-                    <Combobox
-                      variant="outline"
-                      items={['eu', 'com'].map((i) => ({
-                        label: i,
-                        value: i,
-                      }))}
-                      {...field}
-                    />
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a domain" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="eu">eu</SelectItem>
+                        <SelectItem value="com">com</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -141,20 +171,37 @@ export default function DialogCreateProject({
                 <FormItem>
                   <FormLabel>Department</FormLabel>
                   <FormControl>
-                    <Combobox
-                      variant="outline"
-                      items={departments.map((i) => ({
-                        label: i.name,
-                        value: i.id,
-                      }))}
-                      {...field}
-                    />
+                    <Select
+                      value={field.value ? String(field.value) : ''}
+                      onValueChange={(val) =>
+                        field.onChange(Number(val))
+                      }
+                      defaultValue={
+                        field.value ? String(field.value) : ''
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departments.map((d) => (
+                          <SelectItem key={d.id} value={String(d.id)}>
+                            {d.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <ButtonLoading className="w-full" type="submit" loading={mutationCreateProject.isPending}>
+
+            <ButtonLoading
+              className="w-full"
+              type="submit"
+              loading={mutationCreateProject.isPending}
+            >
               Create
             </ButtonLoading>
           </form>

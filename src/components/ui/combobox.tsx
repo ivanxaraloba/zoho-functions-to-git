@@ -21,34 +21,36 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-export function Combobox({
-  items = [],
-  onChange,
-  placeholder,
-  value,
-  size,
-  variant,
-  className,
-}: {
-  items: any;
-  onChange: any;
-  placeholder?: string;
-  value: any;
-  size?: string;
-  variant?: string;
-  className?: string;
-}) {
+export const Combobox = React.forwardRef(function Combobox(
+  {
+    items = [],
+    onChange,
+    placeholder,
+    value,
+    size,
+    variant,
+    className,
+  }: {
+    items: any[];
+    onChange: (value: any) => void;
+    placeholder?: string;
+    value: any;
+    size?: string;
+    variant?: string;
+    className?: string;
+  },
+  ref: any,
+) {
   const [open, setOpen] = React.useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          ref={ref}
           type="button"
-          // @ts-ignore
-          variant={variant}
-          // @ts-ignore
-          size={size}
+          variant={variant as any}
+          size={size as any}
           role="combobox"
           aria-expanded={open}
           className={cn(
@@ -58,9 +60,7 @@ export function Combobox({
         >
           {value ? (
             items.find(
-              (item: any) =>
-                item.value === value || item.label === value,
-              // @ts-ignore
+              (item) => item.value === value || item.label === value,
             )?.label
           ) : (
             <span className="text-muted-foreground">
@@ -79,12 +79,12 @@ export function Combobox({
           <CommandList>
             <CommandEmpty>No item found.</CommandEmpty>
             <CommandGroup>
-              {items.map((item: any) => (
+              {items.map((item) => (
                 <CommandItem
                   key={item.value}
                   value={item.value}
                   onSelect={() => {
-                    onChange && onChange(item.value);
+                    onChange(item.value);
                     setOpen(false);
                   }}
                 >
@@ -105,4 +105,4 @@ export function Combobox({
       </PopoverContent>
     </Popover>
   );
-}
+});
