@@ -51,14 +51,15 @@ export default function PageLogin() {
   });
 
   return (
-    <div className="fixed flex h-full w-full items-center justify-center">
+    <div className="fixed flex flex-col h-full w-full items-center justify-center">
       <Button
         onClick={() => mutationSignIn.mutate()}
-        className="gap-2 bg-blue-600 px-8 py-6 text-white hover:bg-blue-500"
+        className="gap-2 bg-blue-600 !px-8 py-6 text-white hover:bg-blue-500"
       >
         <LogoBitbucket />
         Continue with Bitbucket
       </Button>
+      <span className='text-muted-foreground text-xs mt-2'>Access limited for loba collaborators</span>
     </div>
   );
 }

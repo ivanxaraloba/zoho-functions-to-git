@@ -25,7 +25,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { ButtonNavTabs } from '@/components/layout/nav-tabs';
-import DialogSettingsCRM from '@/components/shared/dialog-settings-crm';
+import DialogSettingsCRM from '@/components/shared/dialog-config-crm';
 import LoadingScreen from '@/components/shared/loading-screen';
 import CodeViewer from '@/components/shared/script-viewer';
 import ScriptViewer from '@/components/shared/script-viewer';

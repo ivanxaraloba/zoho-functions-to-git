@@ -6,11 +6,14 @@ import { getRepository } from '@/lib/bitbucket';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { crmGetFunction, crmGetFunctions } from '@/lib/zoho/crm';
+import { useProject } from '@/providers/project-provider';
 import { Workflow } from '@/types/crm';
 import { IBitbucketRepository, IFunctionCrm } from '@/types/fixed-types';
 import { Commit } from '@/types/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
+  ArrowDownUp,
+  ArrowUpFromLine,
   Ban,
   Check,
   ChevronDown,
@@ -19,16 +22,24 @@ import {
   CircleFadingArrowUp,
   CircleMinus,
   History,
+  Parentheses,
+  RefreshCcw,
+  Settings2Icon,
+  SquareArrowOutUpRight,
   X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { parseAsString, useQueryState } from 'nuqs';
+import { toast } from 'sonner';
 
 import { RowAction, TableData } from '@/components/data-table/data-table-config';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
+import { AppTabDescription } from '@/components/layout/app-tab';
 import CardContainer from '@/components/shared/card-container';
+import DialogConfigCRM from '@/components/shared/dialog-config-crm';
 import ScriptViewer from '@/components/shared/script-viewer';
 import TooltipIcon from '@/components/shared/tooltip-icon';
+import { TypographyH2 } from '@/components/typography/typography-h2';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import ButtonLoading from '@/components/ui/button-loading';
@@ -43,6 +54,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useGlobalStore } from '@/stores/global';
 import { useProjectStore } from '@/stores/project';
 import { useDataTable } from '@/hooks/use-data-table';
+import { DEPARMENTS } from '@/utils/constants';
 import { arr, getRepositoryName, time } from '@/utils/generic';
 import { applyFiltersParamsToQuery } from '@/utils/query';
 import LogoBitbucket from '@/assets/img/logo-bitbucket';
@@ -63,7 +75,7 @@ export interface WorkflowSearch extends Workflow {
 
 export default function TabFunctions({ username }: { username: string }) {
   const { user } = useGlobalStore();
-  const { project, getProject, getCRM } = useProjectStore();
+  const project = useProject();
 
   const [showCommits, setShowCommits] = useState(false);
   const [activeFnId, setActiveFnId] = useQueryState(
@@ -160,6 +172,8 @@ export default function TabFunctions({ username }: { username: string }) {
   });
 
   const activeCommit = useMemo(() => {
+    if (!activeFnId || !activeCommitId) return;
+
     const find =
       queryCommits.data?.arr?.find(
         (c: Commit) => String(c.id) === activeCommitId && c.functionId === activeFnId,
@@ -189,70 +203,110 @@ export default function TabFunctions({ username }: { username: string }) {
 
   const mutationRefresh = useMutation({
     mutationFn: async () => {
-      try {
-        if (!project || !queryCrm.data?.config)
-          throw new Error('Project/crmApp data is not available.');
+      if (!project || !queryCrm.data)
+        throw new Error('Project/crmApp data is not available.');
 
-        const { data: rawFns, error: fetchError } = await crmGetFunctions(
-          project.domain,
-          queryCrm.data.config,
-        );
-        if (fetchError || !rawFns) throw new Error('Failed to fetch functions');
+      const { data: rawFns, error: fetchError } = await crmGetFunctions(
+        project.domain,
+        queryCrm.data.config,
+      );
 
-        const lastSync = queryCrm.data?.lastSync;
-        const recentFns = !lastSync
-          ? rawFns
-          : rawFns.filter(({ updatedTime, createdTime }) => {
-              const fixed = time.fixTime(lastSync);
-              return updatedTime >= fixed || createdTime >= fixed;
-            });
+      if (fetchError) throw new Error(fetchError?.message);
 
-        const recentFnsWithCode = await Promise.all(
-          recentFns.map(async (fn) => {
-            const { data, error } = await crmGetFunction(
-              project.domain,
-              queryCrm.data.config,
-              fn,
-            );
-            if (error || !data) return null;
+      console.log({ rawFns });
 
-            const { modified_on, ...cleanData } = data;
-            return { ...cleanData, crmProjectId: project.id };
-          }),
-        );
+      const lastSync = queryCrm.data?.lastSync;
+      const recentFns = !lastSync
+        ? rawFns
+        : rawFns.filter(({ updatedTime, createdTime }) => {
+            const fixed = time.fixTime(lastSync);
+            return updatedTime >= fixed || createdTime >= fixed;
+          });
 
-        console.log({ recentFnsWithCode });
+      const recentFnsWithCode = await Promise.all(
+        rawFns.map(async (fn) => {
+          const { data, error } = await crmGetFunction(
+            project.domain,
+            queryCrm.data.config,
+            fn,
+          );
+          if (error || !data) return null;
 
-        const validFns = recentFnsWithCode.filter(Boolean);
-        console.log({ validFns });
-        const responseF = await supabase.from('crmFunctions').upsert(validFns);
-        console.log({ responseF });
+          const { modified_on, ...cleanData } = data;
+          return { ...cleanData, crmProjectId: project.id };
+        }),
+      );
 
-        if (responseF.error) throw responseF.error;
-      } catch (err) {
-        console.error('mutationRefresh error:', err);
-      }
+      console.log({ recentFnsWithCode });
+      console.log('length', recentFnsWithCode.length);
 
-      return true;
+      const validFns = recentFnsWithCode.filter(Boolean);
+      console.log({ validFns });
+      const responseF = await supabase.from('crmFunctions').upsert(validFns);
+      console.log({ responseF });
+
+      if (responseF.error) throw responseF.error;
     },
     onSuccess: async () => {
-      console.log('SUCCESSS');
+      await queryFunctions.refetch();
+      toast.success('Functions refreshed successfully');
     },
     onError: (err) => {
-      console.log('ERROR');
-      console.log('Mutation failed:', err);
+      toast.error(err?.message || 'Error refreshing functions');
     },
   });
 
   return (
     <>
-      <FunctionSummary
-        project={project}
-        repository={repository}
-        crm={queryCrm.data}
-        functions={queryFunctions.data}
-      />
-      <div className="mt-6 flex flex-col gap-2.5">
+      <div className="flex items-center justify-between">
+        <div className="">
+          <TypographyH2 className="pb-3">Functions</TypographyH2>
+          <div className="space-y-2">
+            <AppTabDescription icon={Parentheses}>
+              A total of {[]?.length || 0} functions
+            </AppTabDescription>
+
+            <AppTabDescription icon={RefreshCcw}>
+              Last sync occurred {time.timeAgo(queryCrm.data?.lastSync) || '-'}
+            </AppTabDescription>
+
+            {!!repository && project?.departmentId === DEPARMENTS.INTERNOS && (
+              <AppTabDescription icon={ArrowUpFromLine}>
+                Last commit occurred {time.timeAgo(queryCrm.data?.lastCommit) || '-'}
+              </AppTabDescription>
+            )}
+
+            {!!repository && !!queryCrm.data?.lastCommit && (
+              <Description className="mt-4 flex items-center gap-2">
+                <Link
+                  target="_blank"
+                  className="flex items-center gap-2"
+                  href={`https://bitbucket.org/lobadev/${getRepositoryName(project.domain, username)}/src/master/crm/functions`}
+                >
+                  Open Bitbucket Repository
+                  <SquareArrowOutUpRight className="size-3" />
+                </Link>
+              </Description>
+            )}
+          </div>
+        </div>
+        <div className="space-x-2">
+          <DialogConfigCRM project={project} crm={queryCrm.data} />
+          <ButtonLoading disabled variant="secondary" size="sm" icon={ArrowUpFromLine}>
+            Push
+          </ButtonLoading>
+          <ButtonLoading
+            variant="default"
+            size="sm"
+            loading={mutationRefresh.isPending}
+            onClick={() => mutationRefresh.mutate()}
+            icon={RefreshCcw}
+          >
+            Sync
+          </ButtonLoading>
+        </div>
+      </div>
+      <div className="mt-6 flex flex-col gap-3">
         <DataTableToolbar
           table={table}
           filterFields={filterFields}
@@ -260,7 +314,7 @@ export default function TabFunctions({ username }: { username: string }) {
           hideViewOptions
           fitScreen
         />
-        <div className="grid h-[calc(100vh-90px)] grid-cols-4 gap-4">
+        <div className="grid h-[calc(100vh-85px)] grid-cols-4 gap-3">
           <CardContainer className="h-full space-y-1 overflow-auto">
             {queryFunctions.isPending && (
               <>
@@ -270,13 +324,17 @@ export default function TabFunctions({ username }: { username: string }) {
               </>
             )}
             {groupedByCategory.map((group) => (
-              <Collapsible className="group" defaultOpen key={group.label}>
+              <Collapsible
+                className="group"
+                defaultOpen={!!search.search || !!search.filters?.length}
+                key={group.label}
+              >
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" className="h-auto w-full justify-between p-2">
-                    <div className="flex items-center gap-2 font-normal">
+                    <div className="flex items-center gap-2 truncate font-normal">
                       <ChevronRight className="hidden size-4 group-data-[state=closed]:block" />
                       <ChevronDown className="block size-4 group-data-[state=closed]:hidden" />
-                      <span className="text-xs capitalize">{group.label}</span>
+                      <span className="truncate text-xs capitalize">{group.label}</span>
                     </div>
                     <Badge variant="secondary" className="text-xs">
                       {group.items.length}
@@ -352,7 +410,7 @@ export default function TabFunctions({ username }: { username: string }) {
                       Last update: {time.friendlyTime(activeFn.updatedTime)}
                     </Description>
                   </div>
-                  <div className="ml-auto flex items-center">
+                  <div className="ml-auto flex items-center gap-1">
                     <Link
                       target="_blank"
                       href={`https://bitbucket.org/lobadev/sasdsadas/src/master/${PATH_TAB}/${activeFn?.name}.dg`}
@@ -399,7 +457,7 @@ export default function TabFunctions({ username }: { username: string }) {
               </div>
               <div className="flex flex-col gap-1 pt-2 pr-2">
                 <div className="flex gap-2">
-                  <Input placeholder="New commit message (e.g., feat: add feature)" />
+                  <Input placeholder="Commit message (e.g., feat: add feature)" />
                   <ButtonLoading size="sm" type="submit">
                     Commit
                   </ButtonLoading>
@@ -421,7 +479,7 @@ export default function TabFunctions({ username }: { username: string }) {
                     </span>
                   </div>
                 </Button>
-                {queryCommits.data?.obj[activeFn.id].map((commit: Commit) => (
+                {queryCommits.data?.obj[activeFn.id]?.map((commit: Commit) => (
                   <Button
                     key={commit.id}
                     onClick={() => {

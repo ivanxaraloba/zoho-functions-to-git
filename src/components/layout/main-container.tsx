@@ -92,7 +92,7 @@ export default function MainContainer({ children, breadcrumbs = [], className }:
           </div>
         </div>
       </header>
-      <div className={cn('h-full w-full space-y-4 p-6', className)}>{children}</div>
+      <div className={cn('w-full space-y-4 p-6', className)}>{children}</div>
     </div>
   );
 }

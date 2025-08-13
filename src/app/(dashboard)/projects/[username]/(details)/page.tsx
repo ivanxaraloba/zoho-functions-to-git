@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { getRepository, updateRepository } from '@/lib/bitbucket';
 import { supabase } from '@/lib/supabase/client';
+import { useProject } from '@/providers/project-provider';
 import { queryClient } from '@/providers/react-query-provider';
 import { Project } from '@/types/types';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,8 +42,25 @@ import ButtonLoading from '@/components/ui/button-loading';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Combobox } from '@/components/ui/combobox';
 import Description from '@/components/ui/description';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useGlobalStore } from '@/stores/global';
 import { useProjectStore } from '@/stores/project';
 import { getRepositoryName, str } from '@/utils/generic';
@@ -57,14 +75,17 @@ const formSchema = z.object({
 
 export default function Page({ params: { username } }: { params: { username: string } }) {
   const router = useRouter();
-  const { project, getProject } = useProjectStore();
+  const project = useProject();
   const { departments } = useGlobalStore();
 
   const queryStats = useQuery({
     queryKey: ['project_stats', username],
     queryFn: async () => {
       const [totalLogs, errorLogs, successLogs] = await Promise.all([
-        supabase.from('logs').select('*', { count: 'exact', head: true }).eq('projectUsername', username),
+        supabase
+          .from('logs')
+          .select('*', { count: 'exact', head: true })
+          .eq('projectUsername', username),
 
         supabase
           .from('logs')
@@ -114,7 +135,9 @@ export default function Page({ params: { username } }: { params: { username: str
       if (!project) throw new Error('Project data is not available');
 
       if (data.username !== project?.username || data.domain !== project?.domain) {
-        const { data: repository } = await getRepository(getRepositoryName(project.domain, project.username));
+        const { data: repository } = await getRepository(
+          getRepositoryName(project.domain, project.username),
+        );
 
         if (repository) {
           const { error } = await updateRepository(
@@ -125,7 +148,10 @@ export default function Page({ params: { username } }: { params: { username: str
         }
       }
 
-      const { error } = await supabase.from('projects').update(data).eq('id', project?.id);
+      const { error } = await supabase
+        .from('projects')
+        .update(data)
+        .eq('id', project?.id);
 
       if (error) throw error;
 
@@ -155,6 +181,8 @@ export default function Page({ params: { username } }: { params: { username: str
       departmentId: project.departmentId ?? undefined,
     });
   }, [username, project]);
+
+  console.log(form.getValues());
 
   return (
     <MainContainer
@@ -194,12 +222,12 @@ export default function Page({ params: { username } }: { params: { username: str
           {/* basic information */}
           <CardContainer>
             <div className="flex items-center gap-3">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-secondary">
+              <div className="bg-secondary flex size-7 items-center justify-center rounded-lg">
                 <FileText className="size-3" />
               </div>
               <TypographyH3>Basic Information</TypographyH3>
             </div>
-            <div className="mt-4 space-y-2">
+            <div className="mt-6 space-y-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -220,14 +248,24 @@ export default function Page({ params: { username } }: { params: { username: str
                   <FormItem>
                     <FormLabel>Department</FormLabel>
                     <FormControl>
-                      <Combobox
-                        variant="outline"
-                        items={departments.map((i) => ({
-                          label: i.name,
-                          value: i.id,
-                        }))}
-                        {...field}
-                      />
+                      <Select
+                        key={field.value} // 👈 forces re-render with correct value
+                        value={field.value?.toString() || ''}
+                        onValueChange={(value) => field.onChange(Number(value))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a department" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {departments.map((dept) => (
+                              <SelectItem key={dept.id} value={dept.id.toString()}>
+                                {dept.name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -238,15 +276,17 @@ export default function Page({ params: { username } }: { params: { username: str
           {/* username */}
           <CardContainer>
             <div className="flex items-center gap-3">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-secondary">
+              <div className="bg-secondary flex size-7 items-center justify-center rounded-lg">
                 <Globe className="size-3" />
               </div>
               <div className="flex flex-col">
                 <TypographyH3>Domain & URL</TypographyH3>
-                <FormDescription>Modifying this data will apply the name change to the Git repository</FormDescription>
+                <FormDescription>
+                  Modifying this data will apply the name change to the Git repository
+                </FormDescription>
               </div>
             </div>
-            <div className="mt-4 space-y-2">
+            <div className="mt-6 space-y-4">
               <FormField
                 control={form.control}
                 name="username"
@@ -271,14 +311,24 @@ export default function Page({ params: { username } }: { params: { username: str
                   <FormItem>
                     <FormLabel>Domain</FormLabel>
                     <FormControl>
-                      <Combobox
-                        variant="outline"
-                        items={['eu', 'com'].map((i) => ({
-                          label: i,
-                          value: i,
-                        }))}
-                        {...field}
-                      />
+                      <Select
+                        key={field.value} // 👈 forces re-render with correct value
+                        value={field.value || ''}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a domain" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {['eu', 'com'].map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -302,7 +352,11 @@ export default function Page({ params: { username } }: { params: { username: str
               action={() => mutationDeleteProject.mutate()}
             />
 
-            <ButtonLoading type="submit" variant="default" loading={mutationUpdateProject.isPending}>
+            <ButtonLoading
+              type="submit"
+              variant="default"
+              loading={mutationUpdateProject.isPending}
+            >
               Save Changes
             </ButtonLoading>
           </div>

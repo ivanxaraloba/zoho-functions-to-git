@@ -1,20 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { supabase } from '@/lib/supabase/client';
 import { IProjectWithRelations } from '@/types/fixed-types';
 import { useQuery } from '@tanstack/react-query';
-import { ColumnDef, getCoreRowModel, getFilteredRowModel, useReactTable } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
+import { CirclePlus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import MainContainer from '@/components/layout/main-container';
 import CardProject from '@/components/shared/card-project';
+import DialogCreateProject from '@/components/shared/dialog-create-project';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function Page() {
   const router = useRouter();
+
+  const rowRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+
   const [globalFilter, setGlobalFilter] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -23,7 +34,8 @@ export default function Page() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('projects')
-        .select('*, departments(*), crm(id), creator(id, creatorApps(id)), recruit(id)');
+        .select('*, departments(*), crm(id), creator(id, creatorApps(id)), recruit(id)')
+        .order('created_at', { ascending: false });
       if (error) throw new Error(error.message);
       return data ?? [];
     },
@@ -56,21 +68,35 @@ export default function Page() {
     }
   }, [rows.length]);
 
-  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setActiveIndex((i) => (i < rows.length - 1 ? i + 1 : i));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setActiveIndex((i) => (i > 0 ? i - 1 : i));
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (activeIndex >= 0 && activeIndex < rows.length) {
-        const selectedProject = rows[activeIndex].original;
-        router.push(`/projects/${selectedProject.username}`);
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveIndex((i) => (i < rows.length - 1 ? i + 1 : i));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveIndex((i) => (i > 0 ? i - 1 : i));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeIndex >= 0 && activeIndex < rows.length) {
+          const selectedProject = rows[activeIndex].original;
+          router.push(`/projects/${selectedProject.username}`);
+        }
       }
     }
-  }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [rows, activeIndex, router]);
+
+  useEffect(() => {
+    const el = rowRefs.current[activeIndex];
+    if (!el) return;
+    el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    });
+  }, [activeIndex]);
 
   return (
     <MainContainer breadcrumbs={[{ label: 'Projects' }]}>
@@ -81,11 +107,16 @@ export default function Page() {
             placeholder="Search projects..."
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            onKeyDown={onKeyDown}
             className="w-full rounded border p-2"
             autoFocus
           />
         </div>
+        <DialogCreateProject>
+          <Button size="sm" className="ml-auto text-start">
+            <CirclePlus className="size-4" />
+            <span>New Project</span>
+          </Button>
+        </DialogCreateProject>
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
@@ -95,6 +126,7 @@ export default function Page() {
             href={`/projects/${row.original.username}`}
             key={row.original.id}
             onClick={() => setActiveIndex(idx)}
+            ref={(el) => (rowRefs.current[idx] = el)}
           >
             <CardProject project={row.original} isActive={idx === activeIndex} />
           </Link>

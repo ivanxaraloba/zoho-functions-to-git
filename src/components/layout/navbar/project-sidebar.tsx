@@ -2,32 +2,13 @@
 
 import * as React from 'react';
 
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  ChartSpline,
-  Command,
-  Eye,
-  Frame,
-  GalleryVerticalEnd,
-  LayoutDashboard,
-  Logs,
-  Map,
-  PanelsTopLeft,
-  Parentheses,
-  PieChart,
-  ReceiptText,
-  Settings2,
-  SquareTerminal,
-} from 'lucide-react';
+import { useProject } from '@/providers/project-provider';
+import { Logs, ReceiptText } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { NavMain } from '@/components/layout/navbar/nav-main';
-import { NavProjects } from '@/components/layout/navbar/nav-projects';
 import { NavUser } from '@/components/layout/navbar/nav-user';
-import { Separator } from '@/components/ui/separator';
 import {
   Sidebar,
   SidebarContent,
@@ -43,67 +24,43 @@ import LogoCrm from '@/assets/img/logo-crm';
 import LogoLoba from '@/assets/img/logo-loba';
 import LogoRecruit from '@/assets/img/logo-recruit';
 
-export function ProjectSidebar({ username, ...props }: { username: string } & React.ComponentProps<typeof Sidebar>) {
-  const { project } = useProjectStore();
+export function ProjectSidebar({ ...props }: {} & React.ComponentProps<typeof Sidebar>) {
+  const project = useProject();
+  const { username } = project;
   const { user } = useGlobalStore();
+  const pathname = usePathname();
 
   const fullName = user?.user_metadata.full_name ?? '';
   const email = user?.email ?? '';
-  const avatar = fullName ? `${fullName[0]} ${fullName.split(' ')[1]?.[0] ?? ''}`.trim() : '';
+  const initials = fullName
+    .split(' ')
+    .slice(0, 2)
+    .map((s) => s[0])
+    .join(' ')
+    .trim();
 
-  const pathname = usePathname();
+  const createNavItems = (
+    items: { title: string; icon: any; url: string }[],
+    exactMatch?: boolean,
+  ) =>
+    items.map((item) => ({
+      ...item,
+      isActive: exactMatch ? pathname === item.url : pathname.startsWith(item.url),
+    }));
 
-  function isActivePath(pathname: string, url: string, exact = false) {
-    if (exact) return pathname === url;
-    return pathname.startsWith(url);
-  }
+  const projectItems = createNavItems(
+    [
+      { title: 'Details', icon: ReceiptText, url: `/projects/${username}` },
+      { title: 'Logs', icon: Logs, url: `/projects/${username}/logs` },
+    ],
+    true,
+  );
 
-  const projectItems = [
-    {
-      title: 'Details',
-      icon: ReceiptText,
-      url: `/projects/${username}`,
-    },
-    {
-      title: 'Logs',
-      icon: Logs,
-      url: `/projects/${username}/logs`,
-    },
-  ].map((item) => ({
-    ...item,
-    isActive: item.title === 'Details' ? pathname === item.url : pathname.startsWith(item.url),
-  }));
-
-  const project2Items = [
-    {
-      title: 'Zoho CRM',
-      icon: LogoCrm,
-      url: `/projects/${username}/crm`,
-    },
-    {
-      title: 'Zoho Creator',
-      icon: LogoCreator,
-      url: `/projects/${username}/creator`,
-    },
-    {
-      title: 'Zoho Recruit',
-      icon: LogoRecruit,
-      url: `/projects/${username}/recruit`,
-    },
-  ].map((item) => ({
-    ...item,
-    isActive: pathname.startsWith(item.url),
-  }));
-
-  const data = {
-    user: {
-      name: fullName,
-      email: email,
-      avatar: avatar,
-    },
-    project: projectItems,
-    project2: project2Items,
-  };
+  const project2Items = createNavItems([
+    { title: 'Zoho CRM', icon: LogoCrm, url: `/projects/${username}/crm` },
+    { title: 'Zoho Creator', icon: LogoCreator, url: `/projects/${username}/creator` },
+    { title: 'Zoho Recruit', icon: LogoRecruit, url: `/projects/${username}/recruit` },
+  ]);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -122,15 +79,23 @@ export function ProjectSidebar({ username, ...props }: { username: string } & Re
             </div>
           </SidebarMenuButton>
         </Link>
-        {/* <TeamSwitcher teams={data.teams} /> */}
       </SidebarHeader>
+
       <SidebarContent>
-        <NavMain label="Project" items={data.project} />
-        <NavMain label="Integrations" items={data.project2} />
+        <NavMain label="Project" items={projectItems} />
+        <NavMain label="Integrations" items={project2Items} />
       </SidebarContent>
+
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser
+          user={{
+            name: fullName,
+            email,
+            avatar: initials,
+          }}
+        />
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );

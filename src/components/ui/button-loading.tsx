@@ -10,7 +10,12 @@ interface ButtonLoadingProps extends ButtonProps {
   icon?: React.ElementType;
 }
 
-const ButtonLoading: React.FC<ButtonLoadingProps> = ({ loading = false, icon: Icon, children, ...props }) => {
+const ButtonLoading: React.FC<ButtonLoadingProps> = ({
+  loading = false,
+  icon: Icon,
+  children,
+  ...props
+}) => {
   return (
     <Button {...props} disabled={loading || props.disabled}>
       <div className={cn('flex items-center gap-2')}>

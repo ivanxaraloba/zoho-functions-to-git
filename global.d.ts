@@ -7,6 +7,7 @@ declare global {
   type ProjectTable = DB['public']['Tables']['projects']['Row'];
   type DepartmentTable = DB['public']['Tables']['departments']['Row'];
   type CRMTable = DB['public']['Tables']['crm']['Row'];
+  type UsersTable = DB['public']['Tables']['users']['Row'];
   type RecruitTable = DB['public']['Tables']['recruit']['Row'];
   type CreatorTable = DB['public']['Tables']['creator']['Row'];
   type CreatorAppsTable = DB['public']['Tables']['creatorApps']['Row'];

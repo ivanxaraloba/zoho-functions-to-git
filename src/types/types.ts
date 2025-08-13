@@ -197,12 +197,7 @@ export interface User {
   created_at: string;
   updated_at: string;
   is_anonymous: boolean;
-  profile: {
-    id: string;
-    created_at: string;
-    bbUsername: string;
-    bbPassword: string;
-  } | null;
+  profile?: UsersTable | null
 }
 
 export interface Commit {

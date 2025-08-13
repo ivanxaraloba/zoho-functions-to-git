@@ -23,7 +23,7 @@ import { DialogHeader } from '@/components/ui/dialog';
 import { SearchParamsConfig } from '@/hooks/use-data-table';
 import { LOGS_TYPES, LOGS_TYPES_COLORS } from '@/utils/constants';
 
-import { WorkflowSearch } from './tab';
+import { WorkflowSearch } from '../tab';
 
 export const columns = (setRowAction: (action: RowAction<Workflow>) => void): ColumnDef<WorkflowSearch>[] => [
   {

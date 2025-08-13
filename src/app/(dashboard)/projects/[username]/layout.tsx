@@ -1,36 +1,31 @@
-'use client';
-
 import { supabase } from '@/lib/supabase/client';
-import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
+import { ProjectProvider } from '@/providers/project-provider';
+import { notFound } from 'next/navigation';
 
 import { ProjectSidebar } from '@/components/layout/navbar/project-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { useProjectStore } from '@/stores/project';
 
-export default function RootLayout({
+export default async function ProjectLayout({
   children,
-}: Readonly<{
+  params,
+}: {
   children: React.ReactNode;
-}>) {
-  const { username } = useParams<{ username: string }>();
-  const { getProject } = useProjectStore();
+  params: { username: string };
+}) {
+  const { data: project, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('username', params.username)
+    .single();
 
-  const queryProject = useQuery({
-    queryKey: ['project_details', username],
-    queryFn: async () => {
-      const response = await getProject(username);
-      return response;
-    },
-    enabled: !!username,
-  });
+  if (!project) return notFound();
 
   return (
-    queryProject.isFetched && (
-      <SidebarProvider>
-        <ProjectSidebar username={username} />
+    <SidebarProvider>
+      <ProjectProvider project={project}>
+        <ProjectSidebar />
         <SidebarInset>{children}</SidebarInset>
-      </SidebarProvider>
-    )
+      </ProjectProvider>
+    </SidebarProvider>
   );
 }
