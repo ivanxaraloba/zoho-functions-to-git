@@ -38,6 +38,7 @@ import { AppTabDescription } from '@/components/layout/app-tab';
 import CardContainer from '@/components/shared/card-container';
 import DialogConfigCRM from '@/components/shared/dialog-config-crm';
 import ScriptViewer from '@/components/shared/script-viewer';
+import SectionAppViewCommits from '@/components/shared/section-app-view-commits';
 import TooltipIcon from '@/components/shared/tooltip-icon';
 import { TypographyH2 } from '@/components/typography/typography-h2';
 import { Badge } from '@/components/ui/badge';
@@ -148,7 +149,7 @@ export default function TabFunctions({ username }: { username: string }) {
 
   const activeFn = useMemo(() => {
     return queryFunctions.data?.find((fn) => fn.id === activeFnId) || null;
-  }, [activeFnId, queryFunctions.data]);
+  }, [activeFnId, queryFunctions.data]) as IFunctionCrm | null;
 
   const queryCommits = useQuery<any>({
     queryKey: ['crm_functions_commits', username],
@@ -165,6 +166,10 @@ export default function TabFunctions({ username }: { username: string }) {
       return {
         arr: data,
         obj: arr.groupInObj(data, 'functionId'),
+        committed: arr.groupInObj(
+          (data || []).filter((c: CommitsTable) => c.status === 'committed'),
+          'functionId',
+        ),
         pending: arr.groupInObj(
           (data || []).filter((c: CommitsTable) => c.status === 'pending'),
           'functionId',
@@ -294,7 +299,7 @@ export default function TabFunctions({ username }: { username: string }) {
         </div>
         <div className="space-x-2">
           <DialogConfigCRM project={project} crm={queryCrm.data} />
-          <ButtonLoading disabled variant="secondary" size="sm" icon={ArrowUpFromLine}>
+          <ButtonLoading variant="secondary" size="sm" icon={ArrowUpFromLine}>
             Push
           </ButtonLoading>
           <ButtonLoading
@@ -362,10 +367,10 @@ export default function TabFunctions({ username }: { username: string }) {
                             />
                           )}
 
-                          {queryCommits.data?.obj[fn.id]?.length > 0 ? (
+                          {queryCommits.data?.committed[fn.id]?.length > 0 ? (
                             <TooltipIcon
                               icon={ArrowUpFromLine}
-                              text={`${queryCommits.data?.obj[fn.id]?.length} commits`}
+                              text={`${queryCommits.data?.committed[fn.id]?.length} commits pushsed`}
                               className="text-green-400"
                             />
                           ) : (
@@ -378,7 +383,7 @@ export default function TabFunctions({ username }: { username: string }) {
                           {queryCommits.data?.pending[fn.id] && (
                             <TooltipIcon
                               icon={ArrowUpFromLine}
-                              text="Ready to push"
+                              text="Commits waiting to be pushed"
                               className="text-amber-400"
                             />
                           )}
@@ -406,21 +411,16 @@ export default function TabFunctions({ username }: { username: string }) {
             {activeFn && (
               <>
                 <div className="bg-card sticky top-0 z-10 flex h-[69px] w-full items-center border-b">
+                  {activeCommit?.id && (
+                    <Badge variant="outline" className="mr-2 flex items-center gap-2">
+                      <span className="text-muted-foreground text-xs font-medium">
+                        {activeCommit.message}
+                      </span>
+                    </Badge>
+                  )}
                   <div className="flex flex-col">
                     <div className="flex">
                       <span className="text-sm font-medium">{activeFn.display_name}</span>
-                      {activeCommit?.id && (
-                        <span className="ml-3 flex items-center gap-2">
-                          <span className="text-muted-foreground text-xs font-medium">
-                            {activeCommit.message}
-                          </span>
-                          {activeCommit.status === 'committed' ? (
-                            <Check className="!size-3.5 text-green-400" />
-                          ) : (
-                            <CircleFadingArrowUp className="!size-3.5 text-amber-500" />
-                          )}
-                        </span>
-                      )}
                     </div>
                     <Description>
                       Last update: {time.friendlyTime(activeFn.updatedTime)}
@@ -457,85 +457,16 @@ export default function TabFunctions({ username }: { username: string }) {
             )}
           </CardContainer>
           {!!activeFn && showCommits && (
-            <CardContainer className="pt-0">
-              <div className="bg-card sticky top-0 z-10 flex h-[69px] w-full items-center border-b">
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">Commits</span>
-                  <span className="text-muted-foreground text-xs font-medium">
-                    {/* message new commit and see versions, description */}
-                    View all the versions and commit a new
-                  </span>
-                </div>
-                <div className="ml-auto">
-                  <Button
-                    onClick={() => setShowCommits(false)}
-                    variant="ghost"
-                    size="icon"
-                    className="!size-8"
-                  >
-                    <X className="!size-3.5" />
-                  </Button>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-col">
-                <div className="flex gap-2">
-                  <Input placeholder="Commit message (e.g., feat: add feature)" />
-                  <ButtonLoading size="sm" type="submit">
-                    Commit
-                  </ButtonLoading>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Button
-                    onClick={() => {
-                      setActiveCommitId(null);
-                    }}
-                    variant={activeCommitId === null ? 'secondary' : 'ghost'}
-                    className="mt-4 h-full justify-start"
-                  >
-                    <div className="mr-2">
-                      <Circle className="!size-3.5 text-gray-400" />
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <span className="truncate text-sm font-medium">
-                        Current Version
-                      </span>
-                      <span className="text-muted-foreground truncate text-xs font-normal">
-                        Last synced version
-                      </span>
-                    </div>
-                  </Button>
-                  {queryCommits.data?.obj[activeFn.id]?.map((commit: Commit) => (
-                    <Button
-                      key={commit.id}
-                      onClick={() => {
-                        setActiveCommitId(String(commit.id));
-                      }}
-                      variant={
-                        activeCommitId === String(commit.id) ? 'secondary' : 'ghost'
-                      }
-                      className="h-full justify-start px-3 py-1.5"
-                    >
-                      <div className="mr-2">
-                        {commit.status === 'committed' ? (
-                          <Check className="!size-3.5 text-green-400" />
-                        ) : (
-                          <CircleFadingArrowUp className="!size-3.5 text-amber-500" />
-                        )}
-                      </div>
-                      <div className="flex flex-col items-start">
-                        <span className="truncate text-sm font-medium">
-                          {commit.message}
-                        </span>
-                        <span className="text-muted-foreground truncate text-xs font-normal">
-                          {commit.users.bbUsername},{' '}
-                          {time.friendlyTime(commit.created_at)}
-                        </span>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </CardContainer>
+            <SectionAppViewCommits
+              path={PATH_TAB}
+              fn={activeFn}
+              project={project}
+              setShowCommits={setShowCommits}
+              setActiveCommitId={setActiveCommitId}
+              activeCommitId={activeCommitId}
+              commits={queryCommits.data?.obj[activeFn.id] || []}
+              onSuccess={() => queryCommits.refetch()}
+            />
           )}
         </div>
       </div>
