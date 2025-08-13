@@ -26,6 +26,18 @@ export async function GET(request: Request) {
       },
     );
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    // --- Domain restriction logic ---
+    const { data: { user } } = await supabase.auth.getUser();
+    const allowedDomains = ['loba.com'];
+    const userEmail = user?.email || '';
+    const userDomain = userEmail.split('@')[1];
+
+    if (!allowedDomains.includes(userDomain)) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(`${origin}/auth/forbidden`);
+    }
+
     if (!error) {
       return NextResponse.redirect(origin);
     }
